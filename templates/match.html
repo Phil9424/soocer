@@ -18,7 +18,7 @@
                 <div class="team-score-section">
                     {% set my_logo = TEAM_LOGOS.get(my_team, TEAM_LOGOS_FALLBACK.get(my_team, '')) %}
                     {% if my_logo %}
-                    <img src="{{ my_logo }}" alt="{{ my_team }}" class="team-logo-tiny" style="width: 20px !important; height: 20px !important; object-fit: contain !important;">
+                    <img src="{{ my_logo }}" alt="{{ my_team }}" class="team-logo-tiny" style="width: 30px !important; height: 30px !important; object-fit: contain !important;">
                     {% else %}
                     <div class="team-logo-placeholder-tiny">⚽</div>
                     {% endif %}
@@ -34,7 +34,7 @@
                 <div class="team-score-section">
                     {% set opp_logo = TEAM_LOGOS.get(opponent_team, TEAM_LOGOS_FALLBACK.get(opponent_team, '')) %}
                     {% if opp_logo %}
-                    <img src="{{ opp_logo }}" alt="{{ opponent_team }}" class="team-logo-tiny" style="width: 20px !important; height: 20px !important; object-fit: contain !important;">
+                    <img src="{{ opp_logo }}" alt="{{ opponent_team }}" class="team-logo-tiny" style="width: 30px !important; height: 30px !important; object-fit: contain !important;">
                     {% else %}
                     <div class="team-logo-placeholder-tiny">⚽</div>
                     {% endif %}
