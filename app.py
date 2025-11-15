@@ -1106,7 +1106,12 @@ def match_action():
             return jsonify({"success": False})
 
         import random
-        data = request.json
+
+        try:
+            data = request.json
+        except Exception as e:
+            return jsonify({"success": False, "error": f"Invalid JSON: {str(e)}"})
+
         action = data.get('action') if data else None
 
         if not data:
@@ -1424,6 +1429,10 @@ def top_scorers():
     top_scorers_list = scorers_list[:20]
 
     return render_template('top_scorers.html', scorers=top_scorers_list)
+
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204  # No Content
 
 if __name__ == '__main__':
     app.run(debug=True)
