@@ -993,7 +993,7 @@ def pre_match():
     attendance_percent = random.randint(70, 95)
     attendance = int(stadium_capacity * attendance_percent / 100)
     
-    return render_template('pre_match.html', 
+    return render_template('pre_match.html',
                          my_team=my_team,
                          opponent_team=opponent_team,
                          my_lineup=my_lineup,
@@ -1001,7 +1001,9 @@ def pre_match():
                          stadium_name=stadium_name,
                          match_time=match_time,
                          attendance=attendance,
-                         stadium_capacity=stadium_capacity)
+                         stadium_capacity=stadium_capacity,
+                         TEAM_LOGOS=TEAM_LOGOS,
+                         TEAM_LOGOS_FALLBACK=TEAM_LOGOS_FALLBACK)
 
 @app.route('/match')
 def match():
@@ -1093,7 +1095,9 @@ def match():
                          shots_on_target_my_percent=shots_on_target_my_percent,
                          shots_on_target_opponent_percent=shots_on_target_opponent_percent,
                          xg_my_percent=xg_my_percent,
-                         xg_opponent_percent=xg_opponent_percent)
+                         xg_opponent_percent=xg_opponent_percent,
+                         TEAM_LOGOS=TEAM_LOGOS,
+                         TEAM_LOGOS_FALLBACK=TEAM_LOGOS_FALLBACK)
 
 @app.route('/match_action', methods=['POST'])
 def match_action():
