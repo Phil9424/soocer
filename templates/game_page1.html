@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="game-page" style="min-height: 100vh !important; padding-bottom: 2rem !important;">
+        <div class="team-header">
+            <h1 style="font-size: 1.5rem !important; font-weight: 800 !important; margin: 0 !important;">🏆 {{ data.team_name }}</h1>
+        </div>
+
+        <div class="team-info" style="display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 0.8rem !important; margin: 1.5rem 0 !important;">
+            <div class="info-card" style="background: var(--bg-card) !important; border-radius: 12px !important; padding: 1.5rem 1rem !important; box-shadow: var(--shadow-md) !important; text-align: center !important; min-height: 110px !important; display: flex !important; flex-direction: column !important; justify-content: center !important;">
+                <div class="info-label" style="font-size: 2rem !important; margin-bottom: 0.5rem !important;">📊</div>
+                <div class="info-value" style="font-size: 1rem !important; font-weight: 600 !important;">{{ data.division }}</div>
+            </div>
+            <div class="info-card" style="background: var(--bg-card) !important; border-radius: 12px !important; padding: 1.5rem 1rem !important; box-shadow: var(--shadow-md) !important; text-align: center !important; min-height: 110px !important; display: flex !important; flex-direction: column !important; justify-content: center !important;">
+                <div class="info-label" style="font-size: 2rem !important; margin-bottom: 0.5rem !important;">📅</div>
+                <div class="info-value" style="font-size: 1rem !important; font-weight: 600 !important;">Тур {{ data.current_round }}</div>
+            </div>
+            <div class="info-card" style="background: var(--bg-card) !important; border-radius: 12px !important; padding: 1.5rem 1rem !important; box-shadow: var(--shadow-md) !important; text-align: center !important; min-height: 110px !important; display: flex !important; flex-direction: column !important; justify-content: center !important;">
+                <div class="info-label" style="font-size: 2rem !important; margin-bottom: 0.5rem !important;">📍</div>
+                <div class="info-value" style="font-size: 1rem !important; font-weight: 600 !important;">#{{ data.position }}</div>
+            </div>
+            <div class="info-card" style="background: var(--bg-card) !important; border-radius: 12px !important; padding: 1.5rem 1rem !important; box-shadow: var(--shadow-md) !important; text-align: center !important; min-height: 110px !important; display: flex !important; flex-direction: column !important; justify-content: center !important;">
+                <div class="info-label" style="font-size: 2rem !important; margin-bottom: 0.5rem !important;">⭐</div>
+                <div class="info-value" style="font-size: 1rem !important; font-weight: 600 !important;">{{ data.points }}</div>
+            </div>
+            <div class="info-card" style="background: var(--bg-card) !important; border-radius: 12px !important; padding: 1.5rem 1rem !important; box-shadow: var(--shadow-md) !important; text-align: center !important; min-height: 110px !important; display: flex !important; flex-direction: column !important; justify-content: center !important;">
+                <div class="info-label" style="font-size: 2rem !important; margin-bottom: 0.5rem !important;">🏟️</div>
+                <div class="info-value" style="font-size: 0.9rem !important; font-weight: 600 !important;">{{ data.stadium }}</div>
+            </div>
+            <div class="info-card" style="background: var(--bg-card) !important; border-radius: 12px !important; padding: 1.5rem 1rem !important; box-shadow: var(--shadow-md) !important; text-align: center !important; min-height: 110px !important; display: flex !important; flex-direction: column !important; justify-content: center !important;">
+                <div class="info-label" style="font-size: 2rem !important; margin-bottom: 0.5rem !important;">💰</div>
+                <div class="info-value" style="font-size: 1rem !important; font-weight: 600 !important;">£{{ "{:,.0f}".format(data.finances / 1000) }}k</div>
+            </div>
+        </div>
+
+        <div class="next-match" style="background: linear-gradient(135deg, var(--primary-color), var(--light-blue)) !important; border-radius: 16px !important; padding: 2rem 1.5rem !important; margin: 2rem 0 !important; text-align: center !important; color: white !important; box-shadow: var(--shadow-md) !important;">
+            <h3 style="font-size: 1.8rem !important; font-weight: 800 !important; margin: 0 0 0.5rem 0 !important;">⚽ {{ data.next_opponent }}</h3>
+            <p style="font-size: 1rem !important; opacity: 0.95 !important; margin: 0 !important; font-weight: 500 !important;">
+                {% if data.is_home_match %}🏠 Дома{% else %}✈️ В гостях{% endif %} • Тур {{ data.current_round }}/38
+            </p>
+        </div>
+
+        <div class="action-buttons" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important; grid-template-rows: repeat(2, 1fr) !important; gap: 0.8rem !important; margin: 2rem 0 !important;">
+            <a href="{{ url_for('pre_match') }}" class="btn btn-success" style="padding: 1.2rem 1rem !important; font-size: 1rem !important; font-weight: 700 !important; border-radius: 12px !important;">
+                🎮 Матч
+            </a>
+            <button class="btn btn-primary" onclick="saveGame()" style="padding: 1.2rem 1rem !important; font-size: 1rem !important; font-weight: 700 !important; border-radius: 12px !important;">
+                💾 Сохр.
+            </button>
+            <a href="{{ url_for('game_page', page=2) }}" class="btn btn-info" style="padding: 1.2rem 1rem !important; font-size: 1rem !important; font-weight: 700 !important; border-radius: 12px !important;">
+                📊 Табл.
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-danger" style="padding: 1.2rem 1rem !important; font-size: 1rem !important; font-weight: 700 !important; border-radius: 12px !important;">
+                🚪 Выход
+            </a>
+        </div>
+        
+        <div class="page-navigation">
+            <a href="{{ url_for('game_page', page=5) }}" class="nav-btn">◀ Назад</a>
+            <span class="page-indicator">📄 1/5</span>
+            <a href="{{ url_for('game_page', page=2) }}" class="nav-btn">Вперёд ▶</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function saveGame() {
+    fetch('{{ url_for("save_game") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ ' + data.message);
+        } else {
+            alert('❌ ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('❌ Ошибка при сохранении игры');
+    });
+}
+</script>
+{% endblock %}
+

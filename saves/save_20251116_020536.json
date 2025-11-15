@@ -1,0 +1,291 @@
+{
+  "current_round": 1,
+  "division": "Premier League",
+  "finances": 2160142,
+  "finances_data": {
+    "bank_balance": 2160142,
+    "coach_wage": 144881,
+    "debts": 11602,
+    "match_revenue": 187568,
+    "player_wages": 360116,
+    "sponsor_revenue": 524180,
+    "total_expenses": 516599,
+    "total_income": 817454,
+    "tv_revenue": 105706
+  },
+  "is_home_match": false,
+  "next_opponent": "Fulham",
+  "points": 0,
+  "position": 12,
+  "selected_players": [],
+  "squad": [
+    {
+      "name": "Edwin van der Sar",
+      "rating": 86
+    },
+    {
+      "name": "Tomasz Kuszczak",
+      "rating": 76
+    },
+    {
+      "name": "Rio Ferdinand",
+      "rating": 87
+    },
+    {
+      "name": "Nemanja Vidic",
+      "rating": 85
+    },
+    {
+      "name": "Patrice Evra",
+      "rating": 84
+    },
+    {
+      "name": "Gary Neville",
+      "rating": 81
+    },
+    {
+      "name": "Wes Brown",
+      "rating": 78
+    },
+    {
+      "name": "John O'Shea",
+      "rating": 77
+    },
+    {
+      "name": "Michael Carrick",
+      "rating": 83
+    },
+    {
+      "name": "Paul Scholes",
+      "rating": 86
+    },
+    {
+      "name": "Owen Hargreaves",
+      "rating": 82
+    },
+    {
+      "name": "Anderson",
+      "rating": 79
+    },
+    {
+      "name": "Ryan Giggs",
+      "rating": 84
+    },
+    {
+      "name": "Cristiano Ronaldo",
+      "rating": 91
+    },
+    {
+      "name": "Nani",
+      "rating": 80
+    },
+    {
+      "name": "Wayne Rooney",
+      "rating": 88
+    },
+    {
+      "name": "Carlos Tevez",
+      "rating": 85
+    },
+    {
+      "name": "Louis Saha",
+      "rating": 81
+    },
+    {
+      "name": "Dimitar Berbatov",
+      "rating": 85
+    },
+    {
+      "name": "Ji-sung Park",
+      "rating": 79
+    },
+    {
+      "name": "Darren Fletcher",
+      "rating": 78
+    },
+    {
+      "name": "Danny Welbeck",
+      "rating": 65
+    },
+    {
+      "name": "Rafael",
+      "rating": 70
+    },
+    {
+      "name": "Fabio",
+      "rating": 70
+    }
+  ],
+  "stadium": "Old Trafford",
+  "stadium_data": {
+    "east": 16131,
+    "north": 18545,
+    "south": 26515,
+    "ticket_price": 24,
+    "total": 76212,
+    "west": 15021
+  },
+  "table": [
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Arsenal",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Aston Villa",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Birmingham City",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Blackburn Rovers",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Bolton Wanderers",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Chelsea",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Derby County",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Everton",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Fulham",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Liverpool",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Manchester City",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Manchester United",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Middlesbrough",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Newcastle United",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Portsmouth",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Reading",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Sunderland",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Tottenham Hotspur",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "West Ham United",
+      "won": 0
+    },
+    {
+      "drawn": 0,
+      "lost": 0,
+      "played": 0,
+      "points": 0,
+      "team": "Wigan Athletic",
+      "won": 0
+    }
+  ],
+  "team_name": "Manchester United"
+}

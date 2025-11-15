@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="main-menu">
+        <h1 class="game-title">⚽ Футбольный Менеджер</h1>
+        <p class="game-subtitle">Управляй командой, выигрывай трофеи, стань легендой</p>
+        
+        <div class="menu-buttons">
+            <a href="{{ url_for('new_game') }}" class="btn btn-primary">🚀 Начать новую игру</a>
+            <a href="{{ url_for('load_game') }}" class="btn btn-primary">💾 Загрузить игру</a>
+            <a href="{{ url_for('about') }}" class="btn btn-secondary">ℹ️ Об игре</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

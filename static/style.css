@@ -1,0 +1,2045 @@
+/* ============================================
+   FOOTBALL MANAGER - MODERN DESIGN
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Футбольная цветовая палитра */
+    --grass-green: #2d5016;
+    --field-green: #3a7c2f;
+    --bright-green: #4caf50;
+    --lime-green: #8bc34a;
+    --white-line: #ffffff;
+    
+    /* Акцентные цвета */
+    --primary-blue: #1e40af;
+    --dark-blue: #1e3a8a;
+    --light-blue: #3b82f6;
+    --accent-orange: #f97316;
+    --accent-red: #ef4444;
+    --accent-yellow: #fbbf24;
+    
+    /* Нейтральные цвета */
+    --bg-dark: #0f172a;
+    --bg-darker: #020617;
+    --bg-card: #1e293b;
+    --bg-card-light: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --border-light: #475569;
+    
+    /* Тени и эффекты */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.5);
+    
+    /* Градиенты */
+    --gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    --gradient-field: linear-gradient(180deg, #2d5016 0%, #3a7c2f 50%, #4caf50 100%);
+    --gradient-card: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-darker);
+    color: var(--text-primary);
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* Фоновый паттерн поля */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 255, 255, 0.03) 2px,
+            rgba(255, 255, 255, 0.03) 4px
+        ),
+        var(--bg-darker);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 100vh;
+    max-height: 100vh;
+    padding: 0.3rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================
+   ГЛАВНОЕ МЕНЮ
+   ============================================ */
+
+.main-menu {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.main-menu::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+    z-index: 0;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.main-menu > * {
+    position: relative;
+    z-index: 1;
+}
+
+.game-title {
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    text-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+    animation: titleGlow 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+}
+
+.game-subtitle {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 300;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+    max-width: 350px;
+}
+
+/* ============================================
+   КНОПКИ
+   ============================================ */
+
+.btn {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    border: 2px solid var(--border-light);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card-light);
+    border-color: var(--light-blue);
+}
+
+.btn-success {
+    background: var(--gradient-success);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--gradient-danger);
+    color: white;
+}
+
+.btn-action {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   КАРТОЧКИ И КОНТЕЙНЕРЫ
+   ============================================ */
+
+.card {
+    background: var(--gradient-card);
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--border-light);
+}
+
+.card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+}
+
+.card-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* ============================================
+   СТРАНИЦА ИГРЫ
+   ============================================ */
+
+.game-page {
+    padding: 0.4rem 0.5rem;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+.team-header {
+    background: var(--gradient-primary);
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    box-shadow: var(--shadow-xl);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    min-height: 38px;
+    max-height: 38px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.team-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: rotate 15s linear infinite;
+}
+
+.team-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+.team-header h1 {
+    font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+    font-weight: 800;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    line-height: 1;
+    padding: 0;
+}
+
+.team-header p {
+    font-size: 0.6rem;
+    margin: 0;
+    margin-top: 0.1rem;
+    opacity: 0.9;
+    line-height: 1.1;
+}
+
+.team-info {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.info-card {
+    background: var(--bg-card);
+    padding: 0.25rem 0.3rem;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    min-height: 36px;
+    max-height: 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.info-card:hover {
+    background: var(--bg-card-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.info-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-bottom: 0.05rem;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+}
+
+.info-value {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--light-blue);
+    line-height: 1;
+    text-align: center;
+}
+
+.next-match {
+    background: var(--gradient-field);
+    padding: 0.2rem 0.35rem;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    min-height: 28px;
+    max-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.next-match h3 {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    margin: 0;
+    line-height: 1;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.action-buttons .btn {
+    padding: 0.25rem 0.3rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+    min-height: 28px;
+    max-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================================
+   ТУРНИРНАЯ ТАБЛИЦА
+   ============================================ */
+
+.table-container {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 0.6rem;
+    box-shadow: var(--shadow-lg);
+    overflow-x: auto;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.league-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    flex: 1;
+}
+
+.league-table thead {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.league-table th {
+    padding: 0.5rem 0.4rem;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.65rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.league-table th:first-child {
+    border-radius: 10px 0 0 0;
+}
+
+.league-table th:last-child {
+    border-radius: 0 10px 0 0;
+}
+
+.league-table td {
+    padding: 0.4rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.7rem;
+}
+
+.league-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.league-table tbody tr:hover {
+    background: var(--bg-card-light);
+    transform: scale(1.01);
+}
+
+.league-table .my-team {
+    background: rgba(59, 130, 246, 0.2);
+    border-left: 4px solid var(--light-blue);
+    font-weight: 600;
+}
+
+/* ============================================
+   СОСТАВ
+   ============================================ */
+
+.squad-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 0.3rem;
+    padding-bottom: 0.3rem;
+}
+
+.player-item {
+    background: var(--bg-card);
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-height: 36px;
+    user-select: none;
+}
+
+.player-item.selected-for-swap {
+    background: rgba(59, 130, 246, 0.4);
+    border-color: var(--light-blue);
+    border-width: 3px;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    transform: scale(1.02);
+}
+
+.player-item:hover {
+    background: var(--bg-card-light);
+    border-color: var(--light-blue);
+    transform: translateX(2px);
+}
+
+.player-item.player-main {
+    border-left: 4px solid var(--bright-green);
+}
+
+.player-item.player-bench {
+    border-left: 4px solid var(--border-color);
+    opacity: 0.7;
+}
+
+.player-item.player-empty {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.player-item.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+.player-item.drag-over {
+    border-color: var(--accent-yellow);
+    background: rgba(251, 191, 36, 0.1);
+}
+
+.player-position {
+    font-weight: 700;
+    color: var(--light-blue);
+    font-size: 0.7rem;
+    min-width: 20px;
+    text-align: center;
+}
+
+.player-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+.player-status {
+    font-size: 0.8rem;
+    min-width: 30px;
+    text-align: center;
+}
+
+.player-rating {
+    font-weight: 700;
+    color: var(--accent-yellow);
+    font-size: 0.8rem;
+    padding: 0.15rem 0.4rem;
+    background: rgba(251, 191, 36, 0.2);
+    border-radius: 4px;
+    min-width: 35px;
+    text-align: center;
+}
+
+/* ============================================
+   МАТЧ
+   ============================================ */
+
+.match-page {
+    padding: 0.8rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.match-timer {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-xl);
+    z-index: 100;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.match-score {
+    background: var(--gradient-field);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 0.8rem;
+    text-align: center;
+    box-shadow: var(--shadow-xl);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.match-score::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(-50%);
+}
+
+.score-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.score-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    line-height: 1;
+}
+
+.score-separator {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.score-teams {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.team-score-section {
+    flex: 1;
+}
+
+.team-name-small {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 0.4rem;
+}
+
+.goals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.goal-item {
+    font-size: 0.7rem;
+    color: var(--accent-yellow);
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    background: rgba(251, 191, 36, 0.2);
+    border-radius: 6px;
+}
+
+.match-stats {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.stat-row {
+    background: var(--bg-card);
+    padding: 0.8rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-bars {
+    display: flex;
+    gap: 0.6rem;
+    height: 28px;
+}
+
+.stat-bar-container {
+    flex: 1;
+    background: var(--bg-darker);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid var(--border-color);
+}
+
+.stat-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+    border-radius: 6px;
+    position: relative;
+}
+
+.my-bar {
+    background: var(--gradient-primary);
+}
+
+.opponent-bar {
+    background: var(--gradient-danger);
+}
+
+.stat-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.match-controls {
+    background: var(--bg-card);
+    padding: 0.8rem;
+    border-top: 2px solid var(--border-color);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.goal-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 3rem 4rem;
+    border-radius: 20px;
+    z-index: 1000;
+    text-align: center;
+    box-shadow: var(--shadow-xl);
+    border: 3px solid var(--accent-yellow);
+    animation: goalPulse 0.6s ease;
+}
+
+@keyframes goalPulse {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.goal-scorer {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    color: var(--accent-yellow);
+}
+
+.goal-minute {
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+/* ============================================
+   ПРЕДМАТЧЕВЫЙ ЭКРАН
+   ============================================ */
+
+.pre-match-page {
+    padding: 0.4rem 0.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow: hidden;
+}
+
+.match-header {
+    background: var(--gradient-primary);
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-xl);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.match-header h1 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    line-height: 1.1;
+}
+
+.match-teams {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.team-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.vs {
+    font-size: 1rem;
+    font-weight: 900;
+    opacity: 0.8;
+}
+
+.match-info {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.match-info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.65rem;
+}
+
+.lineups-container {
+    background: var(--bg-card);
+    padding: 0.2rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.lineup-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem;
+    margin: 0;
+    margin-bottom: 0.2rem;
+    padding: 0;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.lineup-title-left,
+.lineup-title-right {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.lineup-title-left {
+    text-align: left;
+}
+
+.lineup-title-right {
+    text-align: right;
+}
+
+.lineup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.lineup-row {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    height: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    width: 100%;
+}
+
+.lineup-player {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border-radius: 0;
+    height: 100%;
+    overflow: hidden;
+    flex: 1;
+}
+
+.lineup-player-left {
+    justify-content: flex-start;
+    padding-right: 0.3rem;
+}
+
+.lineup-player-right {
+    justify-content: flex-end;
+    padding-left: 0.3rem;
+}
+
+.lineup-player-position {
+    font-weight: 700;
+    color: var(--light-blue);
+    font-size: 0.7rem;
+    line-height: 24px;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    height: 24px;
+    flex-shrink: 0;
+    margin-right: 0.3rem;
+    width: 16px;
+    text-align: center;
+}
+
+.lineup-player-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    line-height: 24px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    height: 24px;
+    flex: 1;
+}
+
+.match-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.match-actions .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    min-width: 100px;
+}
+
+/* ============================================
+   ФИНАНСЫ И СТАДИОН
+   ============================================ */
+
+.finances-container,
+.stadium-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 0.3rem;
+    padding-bottom: 0.3rem;
+}
+
+.finance-section,
+.stadium-section {
+    background: var(--bg-card);
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    flex-shrink: 0;
+}
+
+.finance-section h3,
+.stadium-section h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.finance-row,
+.stadium-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.75rem;
+}
+
+.finance-row:last-child,
+.stadium-row:last-child {
+    border-bottom: none;
+}
+
+.finance-label,
+.stadium-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.finance-value {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--bright-green);
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
+.finance-value.expense {
+    color: var(--accent-red);
+}
+
+.stadium-value {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--light-blue);
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
+/* ============================================
+   НАВИГАЦИЯ
+   ============================================ */
+
+.page-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.5rem;
+    margin-top: auto;
+    background: var(--bg-card);
+    border-top: 2px solid var(--border-color);
+    border-radius: 8px 8px 0 0;
+    flex-shrink: 0;
+    min-height: 40px;
+    gap: 0.5rem;
+}
+
+.nav-btn {
+    padding: 0.4rem 0.8rem;
+    background: var(--gradient-primary);
+    border: 2px solid var(--light-blue);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    min-height: 32px;
+    min-width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.nav-btn:hover {
+    background: var(--light-blue);
+    border-color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    filter: brightness(1.1);
+}
+
+.nav-btn:active {
+    transform: translateY(0);
+}
+
+.page-indicator {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+    padding: 0.4rem 0.8rem;
+    background: var(--bg-card-light);
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+}
+
+/* ============================================
+   РЕЗУЛЬТАТЫ МАТЧА
+   ============================================ */
+
+.results-list {
+    display: grid;
+    gap: 0.6rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.result-item {
+    background: var(--bg-card);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.result-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.result-teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.result-team {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.result-score {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--light-blue);
+    min-width: 80px;
+    text-align: center;
+}
+
+.result-goals {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.goals-container {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.home-goals, .away-goals {
+    flex: 1;
+    min-width: 0;
+}
+
+.home-goals {
+    text-align: left;
+}
+
+.away-goals {
+    text-align: right;
+}
+
+.goal-item {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.2rem;
+    padding: 0.2rem 0;
+    line-height: 1.2;
+}
+
+.user-match {
+    background: var(--bg-card);
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+
+/* ============================================
+   СПИСОК БОМБАРДИРОВ
+   ============================================ */
+
+.scorers-container {
+    margin: 2rem 0;
+}
+
+.scorers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.scorer-card {
+    background: var(--bg-card);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.scorer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.scorer-card.top-scorer {
+    background: linear-gradient(135deg, var(--primary-color), var(--light-blue));
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.scorer-card.top-scorer .scorer-name,
+.scorer-card.top-scorer .scorer-team {
+    color: white;
+}
+
+.scorer-card.top-scorer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, gold, #ffd700, gold);
+}
+
+.scorer-position {
+    flex-shrink: 0;
+}
+
+.position-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card-light);
+    border-radius: 50%;
+}
+
+.scorer-card.top-scorer .position-number {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.scorer-avatar {
+    flex-shrink: 0;
+}
+
+.avatar-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--light-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.scorer-card.top-scorer .avatar-circle {
+    background: linear-gradient(135deg, gold, #ffd700);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.scorer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.scorer-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 0.3rem 0;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scorer-team {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+    opacity: 0.8;
+}
+
+.scorer-stats {
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.goals-count {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--light-blue);
+    line-height: 1;
+    margin-bottom: 0.2rem;
+}
+
+.scorer-card.top-scorer .goals-count {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.goals-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: lowercase;
+}
+
+.scorer-card.top-scorer .goals-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.no-scorers {
+    text-align: center;
+    padding: 3rem;
+    background: var(--bg-card);
+    border-radius: 15px;
+    box-shadow: var(--shadow-md);
+    grid-column: 1 / -1;
+}
+
+.no-scorers p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Действия страницы */
+.page-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Главная страница - увеличенные элементы */
+.team-info {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1.5rem !important;
+    margin: 2.5rem 0 !important;
+    width: 100% !important;
+}
+
+.team-info .info-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    transition: all 0.3s ease;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.team-info .info-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+
+.team-info .info-label {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+    display: block;
+}
+
+.team-info .info-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.next-match {
+    background: linear-gradient(135deg, var(--primary-color), var(--light-blue));
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    margin: 3rem 0;
+    text-align: center;
+    color: white;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.next-match::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+.next-match h3 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    margin: 0 0 0.8rem 0;
+    text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    position: relative;
+    z-index: 1;
+}
+
+.next-match p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin: 0;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+/* Главная страница - кнопки действий 2x2 */
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin: 3rem 0;
+}
+
+.action-buttons .btn {
+    padding: 1.8rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-align: center;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-lg);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+}
+
+/* Адаптивность для главной страницы */
+@media (max-width: 1200px) {
+    .team-info {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 1rem !important;
+        margin: 2rem 0 !important;
+    }
+
+    .team-info .info-card {
+        padding: 1.5rem 1rem !important;
+        min-height: 120px !important;
+    }
+
+    .team-info .info-label {
+        font-size: 2rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .team-info .info-value {
+        font-size: 1rem !important;
+    }
+
+    .action-buttons {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: repeat(2, 1fr) !important;
+        gap: 1rem !important;
+        margin: 2rem 0 !important;
+    }
+
+    .action-buttons .btn {
+        padding: 1.2rem 0.8rem !important;
+        font-size: 1rem !important;
+        min-height: 70px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .team-info {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.8rem !important;
+        margin: 1.5rem 0 !important;
+    }
+
+    .team-info .info-card {
+        padding: 1.2rem 0.8rem !important;
+        min-height: 100px !important;
+    }
+
+    .team-info .info-label {
+        font-size: 1.8rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    .team-info .info-value {
+        font-size: 0.9rem !important;
+    }
+
+    .action-buttons {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: repeat(2, 1fr) !important;
+        gap: 0.8rem !important;
+        margin: 1.5rem 0 !important;
+    }
+
+    .action-buttons .btn {
+        padding: 1rem 0.6rem !important;
+        font-size: 0.9rem !important;
+        min-height: 60px !important;
+    }
+}
+
+.user-match-badge {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+/* ============================================
+   ВЫБОР КОМАНДЫ
+   ============================================ */
+
+.team-selection {
+    padding: 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.team-selection h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.8rem;
+    text-align: center;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+}
+
+/* .team-list стили закомментированы - используем только inline стили */
+/*
+.team-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+}
+*/
+
+.team-btn {
+    padding: 1rem 0.8rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.team-btn:hover {
+    background: var(--bg-card-light);
+    border-color: var(--light-blue);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Стили для логотипов команд */
+.team-logo-small {
+    width: 40px !important;
+    height: 40px !important;
+    object-fit: contain !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.team-logo-placeholder {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    background: var(--light-blue) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.team-info-with-logo {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.team-logo-tiny {
+    width: 24px !important;
+    height: 24px !important;
+    object-fit: contain !important;
+    margin-bottom: 0.25rem !important;
+}
+
+.team-logo-placeholder-tiny {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 50% !important;
+    background: var(--light-blue) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* Адаптивность для выбора команды */
+@media (max-width: 768px) {
+    .team-selection {
+        padding: 1rem 0.5rem;
+    }
+
+    .team-selection h1 {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .team-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+        padding: 0.5rem;
+    }
+
+    .team-btn {
+        padding: 0.8rem 0.5rem;
+        font-size: 0.8rem;
+        min-height: 45px;
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .team-list {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .team-btn {
+        padding: 1rem 0.5rem;
+        font-size: 0.85rem;
+        min-height: 50px;
+    }
+}
+
+/* ============================================
+   ЗАГРУЗКА ИГРЫ
+   ============================================ */
+
+.load-game-page {
+    padding: 1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.load-game-page h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.8rem;
+    text-align: center;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+}
+
+.saves-list {
+    display: grid;
+    gap: 0.6rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.save-item {
+    background: var(--bg-card);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--light-blue);
+}
+
+.save-item:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.save-info strong {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.save-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* ============================================
+   ОБ ИГРЕ
+   ============================================ */
+
+.about-page {
+    padding: 1rem;
+    height: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.about-page h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 0.8rem;
+    text-align: center;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+}
+
+.about-content {
+    background: var(--bg-card);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    line-height: 1.5;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.about-content p {
+    margin-bottom: 0.8rem;
+}
+
+.about-content ul {
+    margin-bottom: 0.8rem;
+    padding-left: 1.5rem;
+}
+
+.about-content li {
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   АДАПТИВНОСТЬ
+   ============================================ */
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0.3rem;
+    }
+    
+    .game-page,
+    .pre-match-page,
+    .match-page {
+        padding: 0.4rem;
+        gap: 0.4rem;
+    }
+    
+    .team-header {
+        padding: 0.5rem 0.8rem;
+    }
+    
+    .team-header h1 {
+        font-size: 1rem;
+    }
+    
+    .team-info {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.3rem;
+    }
+    
+    .info-card {
+        padding: 0.4rem 0.5rem;
+        min-height: 45px;
+    }
+    
+    .info-label {
+        font-size: 0.55rem;
+    }
+    
+    .info-value {
+        font-size: 0.8rem;
+    }
+    
+    .action-buttons {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.3rem;
+    }
+    
+    .action-buttons .btn {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.5rem;
+    }
+    
+    .next-match {
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .next-match h3 {
+        font-size: 0.75rem;
+    }
+    
+    .score-number {
+        font-size: 2rem;
+    }
+    
+    .match-timer {
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .team-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .squad-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .lineup-header {
+        grid-template-columns: 1fr;
+        gap: 0.3rem;
+    }
+    
+    .lineup-title-left,
+    .lineup-title-right {
+        text-align: center;
+    }
+    
+    .lineup-row {
+        grid-template-columns: 1fr;
+        gap: 0.3rem;
+    }
+    
+    .match-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .page-navigation {
+        flex-direction: row;
+        gap: 0.3rem;
+        padding: 0.3rem 0.4rem;
+        min-height: 36px;
+    }
+    
+    .nav-btn {
+        flex: 1;
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+        min-width: auto;
+    }
+    
+    .page-indicator {
+        font-size: 0.65rem;
+        padding: 0.3rem 0.5rem;
+    }
+}
+
+/* ============================================
+   АНИМАЦИИ И ЭФФЕКТЫ
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card,
+.info-card,
+.player-item,
+.result-item {
+    animation: fadeIn 0.5s ease;
+}
+
+/* Скроллбар */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-card-light);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--border-light);
+}

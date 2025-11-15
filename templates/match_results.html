@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="game-page">
+        <div class="team-header">
+            <h1>📊 Итоги {{ session.get('current_round', 1) - 1 }} тура</h1>
+            <p style="opacity: 0.9; margin-top: 0.5rem;">Результаты матчей</p>
+        </div>
+        
+        <div class="results-list">
+            {% for result in results %}
+            <div class="result-item {% if result.is_user_match %}user-match{% endif %}">
+                <div class="result-teams">
+                    <span class="result-team">{{ result.home_team }}</span>
+                    <span class="result-score">{{ result.home_score }} - {{ result.away_score }}</span>
+                    <span class="result-team">{{ result.away_team }}</span>
+                </div>
+                {% if result.goals %}
+                <div class="result-goals">
+                    <div class="goals-container">
+                        <div class="home-goals">
+                            {% for goal in result.goals %}
+                                {% if goal.team == result.home_team %}
+                                <div class="goal-item">
+                                    ⚽ {{ goal.scorer }} ({{ goal.minute }}')
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="away-goals">
+                            {% for goal in result.goals %}
+                                {% if goal.team == result.away_team %}
+                                <div class="goal-item">
+                                    ⚽ {{ goal.scorer }} ({{ goal.minute }}')
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if result.is_user_match %}
+                <div class="user-match-badge">🏆 Ваш матч</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="results-actions" style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('game_page', page=1) }}" class="btn btn-success" style="font-size: 1.2rem; padding: 1rem 2rem;">✅ Продолжить игру</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

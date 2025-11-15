@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="game-page">
+        <div class="team-header">
+            <h1>🏆 Бомбардиры чемпионата</h1>
+            <p style="opacity: 0.9; margin-top: 0.5rem;">Лучшие снайперы сезона</p>
+            <div class="page-actions">
+                <a href="{{ url_for('game_page', page=2) }}" class="btn btn-danger" style="font-size: 0.9rem; padding: 0.6rem 1rem;">
+                    ❌ Закрыть
+                </a>
+            </div>
+        </div>
+
+        <div class="scorers-container">
+            {% if scorers %}
+                <div class="scorers-grid">
+                    {% for scorer in scorers %}
+                    <div class="scorer-card {% if loop.index <= 3 %}top-scorer{% endif %}">
+                        <div class="scorer-position">
+                            <div class="position-number">
+                                {% if loop.index == 1 %}🥇
+                                {% elif loop.index == 2 %}🥈
+                                {% elif loop.index == 3 %}🥉
+                                {% else %}{{ loop.index }}{% endif %}
+                            </div>
+                        </div>
+                        <div class="scorer-avatar">
+                            <div class="avatar-circle">
+                                {% if loop.index == 1 %}👑
+                                {% elif loop.index == 2 %}⭐
+                                {% elif loop.index == 3 %}🏅
+                                {% else %}⚽{% endif %}
+                            </div>
+                        </div>
+                        <div class="scorer-info">
+                            <h3 class="scorer-name">{{ scorer.name }}</h3>
+                            <p class="scorer-team">{{ scorer.team }}</p>
+                        </div>
+                        <div class="scorer-stats">
+                            <div class="goals-count">{{ scorer.goals }}</div>
+                            <div class="goals-label">
+                                {% if scorer.goals == 1 %}гол{% elif scorer.goals < 5 %}гола{% else %}голов{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-scorers">
+                    <p>🎯 Матчи еще не сыграны. Сыграйте несколько матчей, чтобы увидеть статистику бомбардиров!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="game-page pre-match-page">
+        <div class="match-header">
+            <h1>⚽ Предматчевый экран</h1>
+            <div class="match-teams">
+                <div class="team-info-with-logo">
+                    {% set my_logo = TEAM_LOGOS.get(my_team, TEAM_LOGOS_FALLBACK.get(my_team, '')) %}
+                    {% if my_logo %}
+                    <img src="{{ my_logo }}" alt="{{ my_team }}" class="team-logo-small">
+                    {% else %}
+                    <div class="team-logo-placeholder">⚽</div>
+                    {% endif %}
+                    <div class="team-name">{{ my_team }}</div>
+                </div>
+                <div class="vs">VS</div>
+                <div class="team-info-with-logo">
+                    {% set opp_logo = TEAM_LOGOS.get(opponent_team, TEAM_LOGOS_FALLBACK.get(opponent_team, '')) %}
+                    {% if opp_logo %}
+                    <img src="{{ opp_logo }}" alt="{{ opponent_team }}" class="team-logo-small">
+                    {% else %}
+                    <div class="team-logo-placeholder">⚽</div>
+                    {% endif %}
+                    <div class="team-name">{{ opponent_team }}</div>
+                </div>
+            </div>
+            <div class="match-info">
+                <div class="match-info-item">
+                    <span>🏟️</span>
+                    <span>{{ stadium_name }}</span>
+                </div>
+                <div class="match-info-item">
+                    <span>🕐</span>
+                    <span>{{ match_time }}</span>
+                </div>
+                <div class="match-info-item">
+                    <span>👥</span>
+                    <span>{{ "{:,}".format(attendance) }}/{{ "{:,}".format(stadium_capacity) }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="lineups-container">
+            <div class="lineup-list">
+                {% set max_players = [my_lineup|length, opponent_lineup|length]|max %}
+                {% for i in range(max_players) %}
+                <div class="lineup-row">
+                    <div class="lineup-player lineup-player-left">
+                        {% if i < my_lineup|length %}
+                        <span class="lineup-player-position">{{ my_lineup[i].position }}</span>
+                        <span class="lineup-player-name">{{ my_lineup[i].name }}</span>
+                        {% else %}
+                        <span class="lineup-player-name">-</span>
+                        {% endif %}
+                    </div>
+                    <div class="lineup-player lineup-player-right">
+                        {% if i < opponent_lineup|length %}
+                        <span class="lineup-player-position">{{ opponent_lineup[i].position }}</span>
+                        <span class="lineup-player-name">{{ opponent_lineup[i].name }}</span>
+                        {% else %}
+                        <span class="lineup-player-name">-</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="match-actions">
+            <a href="{{ url_for('game_page', page=3) }}" class="btn btn-secondary">✏️ Изменить</a>
+            <button class="btn btn-success" onclick="startMatch()">🚀 Начать</button>
+            <a href="{{ url_for('game_page', page=1) }}" class="btn btn-danger">❌ Отмена</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function startMatch() {
+    if (confirm('⚽ Начать матч?\n\n{{ my_team }} VS {{ opponent_team }}')) {
+        window.location.href = '{{ url_for("match") }}';
+    }
+}
+</script>
+{% endblock %}
+

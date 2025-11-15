@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="game-page">
+        <div class="team-header">
+            <h1>💰 Финансы команды</h1>
+        </div>
+        
+        <div class="finances-container">
+            <div class="finance-section">
+                <h3>💵 Доходы</h3>
+                <div class="finance-row">
+                    <span class="finance-label">Денег за билеты за последний матч:</span>
+                    <span class="finance-value">£{{ "{:,}".format(data.finances_data.match_revenue) }}</span>
+                </div>
+                <div class="finance-row">
+                    <span class="finance-label">ТВ премии:</span>
+                    <span class="finance-value">£{{ "{:,}".format(data.finances_data.tv_revenue) }}</span>
+                </div>
+                <div class="finance-row">
+                    <span class="finance-label">Спонсора:</span>
+                    <span class="finance-value">£{{ "{:,}".format(data.finances_data.sponsor_revenue) }}</span>
+                </div>
+            </div>
+            
+            <div class="finance-section">
+                <h3>💸 Расходы</h3>
+                <div class="finance-row">
+                    <span class="finance-label">Зарплаты игроков:</span>
+                    <span class="finance-value expense">-£{{ "{:,}".format(data.finances_data.player_wages) }}</span>
+                </div>
+                <div class="finance-row">
+                    <span class="finance-label">Зарплата тренера:</span>
+                    <span class="finance-value expense">-£{{ "{:,}".format(data.finances_data.coach_wage) }}</span>
+                </div>
+                <div class="finance-row">
+                    <span class="finance-label">Долги:</span>
+                    <span class="finance-value expense">-£{{ "{:,}".format(data.finances_data.debts) }}</span>
+                </div>
+            </div>
+            
+            <div class="finance-section" style="background: rgba(59, 130, 246, 0.2); border: 2px solid var(--light-blue);">
+                <h3>📊 Итого</h3>
+                <div class="finance-row">
+                    <span class="finance-label"><strong>Чистая прибыль:</strong></span>
+                    <span class="finance-value"><strong>£{{ "{:,}".format(data.finances_data.total_income - data.finances_data.total_expenses) }}</strong></span>
+                </div>
+                <div class="finance-row">
+                    <span class="finance-label"><strong>💰 В банке денег:</strong></span>
+                    <span class="finance-value"><strong style="color: var(--bright-green); font-size: 1.3rem;">£{{ "{:,}".format(data.finances_data.bank_balance) }}</strong></span>
+                </div>
+            </div>
+            
+            <div class="finance-buttons" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="alert('Функция в разработке')">🏦 Займ в банке</button>
+                <button class="btn btn-secondary" onclick="alert('Функция в разработке')">👨‍💼 Стоимость тренеров</button>
+            </div>
+        </div>
+        
+        <div class="page-navigation">
+            <a href="{{ url_for('game_page', page=3) }}" class="nav-btn">◀ Назад</a>
+            <span class="page-indicator">📄 4/5</span>
+            <a href="{{ url_for('game_page', page=5) }}" class="nav-btn">Вперёд ▶</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

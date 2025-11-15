@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="game-page">
+        <div class="team-header">
+            <h1>👥 Состав команды - <span id="selected-count" style="color: var(--accent-yellow);">{{ (data.selected_players|default([]))|length }}</span>/11</h1>
+        </div>
+        
+        <div class="squad-list" id="squad-list">
+            {% set selected_players_list = data.selected_players|default([]) %}
+            
+            {# Основной состав (первые 11) #}
+            {% for i in range(11) %}
+                {% if i < selected_players_list|length %}
+                    {% set player_name = selected_players_list[i] %}
+                    {% set player = data.squad|selectattr("name", "equalto", player_name)|first %}
+                    {% if player %}
+                        {# Определяем позицию на основе места: 1=В, 2-5=З, 6-9=П, 10-11=Н #}
+                        {% if i == 0 %}
+                            {% set position = 'В' %}
+                        {% elif i >= 1 and i <= 4 %}
+                            {% set position = 'З' %}
+                        {% elif i >= 5 and i <= 8 %}
+                            {% set position = 'П' %}
+                        {% else %}
+                            {% set position = 'Н' %}
+                        {% endif %}
+                    <div class="player-item player-main" data-player-name="{{ player.name }}" data-position-index="{{ i }}">
+                        <span class="player-position">{{ position }}</span>
+                        <span class="player-name">{{ player.name }}</span>
+                        {% if player.get('injury') or player.get('cards') %}
+                        <span class="player-status">
+                            {% if player.get('injury') %}🏥{% endif %}
+                            {% if player.get('cards') == 1 %}🟨{% elif player.get('cards') == 2 %}🟥{% endif %}
+                        </span>
+                        {% endif %}
+                        <span class="player-rating">{{ player.rating }}</span>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    {# Определяем позицию для пустого места #}
+                    {% if i == 0 %}
+                        {% set position = 'В' %}
+                    {% elif i >= 1 and i <= 4 %}
+                        {% set position = 'З' %}
+                    {% elif i >= 5 and i <= 8 %}
+                        {% set position = 'П' %}
+                    {% else %}
+                        {% set position = 'Н' %}
+                    {% endif %}
+                    <div class="player-item player-main player-empty" data-position-index="{{ i }}">
+                        <span class="player-position">{{ position }}</span>
+                        <span class="player-name">Пусто</span>
+                        <span class="player-rating">-</span>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            
+            {# Запасные #}
+            {% for player in data.squad %}
+                {% if player.name not in selected_players_list %}
+                <div class="player-item player-bench" data-player-name="{{ player.name }}">
+                    <span class="player-position">-</span>
+                    <span class="player-name">{{ player.name }}</span>
+                    {% if player.get('injury') or player.get('cards') %}
+                    <span class="player-status">
+                        {% if player.get('injury') %}🏥{% endif %}
+                        {% if player.get('cards') == 1 %}🟨{% elif player.get('cards') == 2 %}🟥{% endif %}
+                    </span>
+                    {% endif %}
+                    <span class="player-rating">{{ player.rating }}</span>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <div class="page-navigation">
+            <a href="{{ url_for('game_page', page=2) }}" class="nav-btn">◀ Назад</a>
+            <span class="page-indicator">📄 3/5</span>
+            <a href="{{ url_for('game_page', page=4) }}" class="nav-btn">Вперёд ▶</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedPlayer = null;
+
+// Обработчик клика для игроков
+function handlePlayerClick(e) {
+    e.stopPropagation();
+    const item = this;
+    
+    if (item.classList.contains('player-empty')) return;
+    
+    // Если первый игрок не выбран, выбираем его
+    if (!selectedPlayer) {
+        selectedPlayer = item;
+        item.classList.add('selected-for-swap');
+        return;
+    }
+    
+    // Если кликнули на того же игрока, снимаем выделение
+    if (selectedPlayer === item) {
+        selectedPlayer.classList.remove('selected-for-swap');
+        selectedPlayer = null;
+        return;
+    }
+    
+    // Меняем местами двух игроков
+    swapPlayers(selectedPlayer, item);
+}
+
+// Инициализация системы swap (клик на двух игроках)
+function initSwapSystem() {
+    // Удаляем все старые обработчики и добавляем новые
+    document.querySelectorAll('.player-item:not(.player-empty)').forEach(item => {
+        // Удаляем старый обработчик, если он был добавлен через addEventListener
+        // Создаем новый элемент для сброса обработчиков
+        const newItem = item.cloneNode(true);
+        item.parentNode.replaceChild(newItem, item);
+        
+        // Добавляем обработчик на новый элемент
+        newItem.addEventListener('click', handlePlayerClick);
+    });
+}
+
+function swapPlayers(player1, player2) {
+    if (!player1 || !player2 || player1 === player2) return;
+    
+    const squadList = document.getElementById('squad-list');
+    
+    // Сохраняем данные для обновления ссылок
+    const player1Name = player1.dataset.playerName;
+    const player2Name = player2.dataset.playerName;
+    
+    // Сохраняем следующий элемент после второго игрока
+    const next2 = player2.nextSibling;
+    
+    // Меняем местами
+    if (player1.nextSibling === player2) {
+        // Если игроки рядом
+        squadList.insertBefore(player2, player1);
+    } else {
+        // Если игроки не рядом
+        squadList.insertBefore(player2, player1);
+        squadList.insertBefore(player1, next2);
+    }
+    
+    // Обновляем ссылку на selectedPlayer, если он был перемещен
+    if (selectedPlayer) {
+        // Находим элемент по имени после перемещения
+        const newSelectedElement = Array.from(squadList.querySelectorAll('.player-item')).find(
+            item => item.dataset.playerName === selectedPlayer.dataset.playerName
+        );
+        if (newSelectedElement) {
+            selectedPlayer = newSelectedElement;
+        }
+        selectedPlayer.classList.remove('selected-for-swap');
+        selectedPlayer = null;
+    }
+    
+    // Обновляем состав
+    updateLineup();
+}
+
+// Инициализируем при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initSwapSystem();
+});
+
+function getPositionByIndex(index) {
+    if (index === 0) return 'В';  // Вратарь
+    if (index >= 1 && index <= 4) return 'З';  // Защитники
+    if (index >= 5 && index <= 8) return 'П';  // Полузащитники
+    if (index >= 9 && index <= 10) return 'Н';  // Нападение
+    return '-';
+}
+
+function updateLineup() {
+    const squadList = document.getElementById('squad-list');
+    const allItems = Array.from(squadList.querySelectorAll('.player-item'));
+    const playerOrder = allItems
+        .slice(0, 11)
+        .map(item => item.dataset.playerName)
+        .filter(name => name);
+    
+    // Обновляем счетчик
+    document.getElementById('selected-count').textContent = playerOrder.length;
+    
+    // Обновляем классы и позиции
+    allItems.forEach((item, index) => {
+        if (index < 11) {
+            item.classList.remove('player-bench');
+            item.classList.add('player-main');
+            item.dataset.positionIndex = index;
+            
+            // Обновляем позицию
+            const positionSpan = item.querySelector('.player-position');
+            if (positionSpan) {
+                positionSpan.textContent = getPositionByIndex(index);
+            }
+            
+            if (!item.dataset.playerName) {
+                item.classList.add('player-empty');
+            } else {
+                item.classList.remove('player-empty');
+            }
+        } else {
+            item.classList.remove('player-main', 'player-empty');
+            item.classList.add('player-bench');
+            const positionSpan = item.querySelector('.player-position');
+            if (positionSpan) {
+                positionSpan.textContent = '-';
+            }
+        }
+    });
+    
+    // Сбрасываем выделение
+    selectedPlayer = null;
+    
+    // Сбрасываем флаги обработчиков для всех элементов
+    document.querySelectorAll('.player-item').forEach(item => {
+        delete item.dataset.hasClickHandler;
+        item.classList.remove('selected-for-swap');
+    });
+    
+    // Переинициализируем систему swap после небольшой задержки для обновления DOM
+    requestAnimationFrame(() => {
+        initSwapSystem();
+    });
+    
+    // Отправляем на сервер
+    fetch('{{ url_for("update_lineup") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            player_order: playerOrder
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Ошибка при обновлении состава');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

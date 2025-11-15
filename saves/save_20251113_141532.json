@@ -1,0 +1,267 @@
+{
+  "division": "Premier League",
+  "finances": 1604255,
+  "finances_data": {
+    "bank_balance": 1604255,
+    "coach_wage": 74350,
+    "debts": 457466,
+    "match_revenue": 85024,
+    "player_wages": 745503,
+    "sponsor_revenue": 280791,
+    "total_expenses": 1277319,
+    "total_income": 705437,
+    "tv_revenue": 339622
+  },
+  "next_opponent": "Manchester United",
+  "points": 25,
+  "position": 12,
+  "squad": [
+    {
+      "name": "Michael Martinez"
+    },
+    {
+      "name": "Kevin Martin"
+    },
+    {
+      "name": "Daniel Taylor"
+    },
+    {
+      "name": "Mark Martinez"
+    },
+    {
+      "name": "Brian Moore"
+    },
+    {
+      "name": "Kevin Moore"
+    },
+    {
+      "name": "George Martinez"
+    },
+    {
+      "name": "Mark Johnson"
+    },
+    {
+      "name": "Kevin Johnson"
+    },
+    {
+      "name": "Andrew Martin"
+    },
+    {
+      "name": "Andrew Hernandez"
+    },
+    {
+      "name": "Robert Lopez"
+    },
+    {
+      "name": "Thomas Martin"
+    },
+    {
+      "name": "James Lee"
+    },
+    {
+      "name": "George Thomas"
+    },
+    {
+      "name": "Richard Johnson"
+    },
+    {
+      "name": "James Smith"
+    },
+    {
+      "name": "Daniel Wilson"
+    },
+    {
+      "name": "James Jones"
+    },
+    {
+      "name": "George Smith"
+    },
+    {
+      "name": "William Martin"
+    },
+    {
+      "name": "Robert Smith"
+    },
+    {
+      "name": "Michael Martin"
+    },
+    {
+      "name": "Andrew Moore"
+    },
+    {
+      "name": "Robert Moore"
+    }
+  ],
+  "stadium": "Liverpool Stadium",
+  "stadium_data": {
+    "east": 6683,
+    "north": 8042,
+    "south": 5774,
+    "ticket_price": 21,
+    "total": 35206,
+    "west": 14707
+  },
+  "table": [
+    {
+      "drawn": 4,
+      "lost": 1,
+      "played": 20,
+      "points": 49,
+      "team": "West Ham United",
+      "won": 15
+    },
+    {
+      "drawn": 5,
+      "lost": 1,
+      "played": 20,
+      "points": 47,
+      "team": "Portsmouth",
+      "won": 14
+    },
+    {
+      "drawn": 2,
+      "lost": 2,
+      "played": 18,
+      "points": 44,
+      "team": "Blackburn Rovers",
+      "won": 14
+    },
+    {
+      "drawn": 3,
+      "lost": 1,
+      "played": 16,
+      "points": 39,
+      "team": "Arsenal",
+      "won": 12
+    },
+    {
+      "drawn": 2,
+      "lost": 6,
+      "played": 19,
+      "points": 35,
+      "team": "Everton",
+      "won": 11
+    },
+    {
+      "drawn": 2,
+      "lost": 4,
+      "played": 16,
+      "points": 32,
+      "team": "Chelsea",
+      "won": 10
+    },
+    {
+      "drawn": 5,
+      "lost": 4,
+      "played": 18,
+      "points": 32,
+      "team": "Manchester United",
+      "won": 9
+    },
+    {
+      "drawn": 1,
+      "lost": 9,
+      "played": 20,
+      "points": 31,
+      "team": "Aston Villa",
+      "won": 10
+    },
+    {
+      "drawn": 2,
+      "lost": 7,
+      "played": 18,
+      "points": 29,
+      "team": "Wigan Athletic",
+      "won": 9
+    },
+    {
+      "drawn": 1,
+      "lost": 6,
+      "played": 16,
+      "points": 28,
+      "team": "Manchester City",
+      "won": 9
+    },
+    {
+      "drawn": 2,
+      "lost": 4,
+      "played": 14,
+      "points": 26,
+      "team": "Newcastle United",
+      "won": 8
+    },
+    {
+      "drawn": 1,
+      "lost": 2,
+      "played": 11,
+      "points": 25,
+      "team": "Liverpool",
+      "won": 8
+    },
+    {
+      "drawn": 5,
+      "lost": 8,
+      "played": 19,
+      "points": 23,
+      "team": "Bolton Wanderers",
+      "won": 6
+    },
+    {
+      "drawn": 5,
+      "lost": 1,
+      "played": 10,
+      "points": 17,
+      "team": "Tottenham Hotspur",
+      "won": 4
+    },
+    {
+      "drawn": 7,
+      "lost": 2,
+      "played": 12,
+      "points": 16,
+      "team": "Derby County",
+      "won": 3
+    },
+    {
+      "drawn": 4,
+      "lost": 8,
+      "played": 16,
+      "points": 16,
+      "team": "Fulham",
+      "won": 4
+    },
+    {
+      "drawn": 2,
+      "lost": 5,
+      "played": 11,
+      "points": 14,
+      "team": "Birmingham City",
+      "won": 4
+    },
+    {
+      "drawn": 1,
+      "lost": 9,
+      "played": 14,
+      "points": 13,
+      "team": "Middlesbrough",
+      "won": 4
+    },
+    {
+      "drawn": 4,
+      "lost": 9,
+      "played": 16,
+      "points": 13,
+      "team": "Sunderland",
+      "won": 3
+    },
+    {
+      "drawn": 2,
+      "lost": 14,
+      "played": 19,
+      "points": 11,
+      "team": "Reading",
+      "won": 3
+    }
+  ],
+  "team_name": "Liverpool"
+}

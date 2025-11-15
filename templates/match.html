@@ -1,0 +1,623 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="game-page match-page">
+        <div class="match-timer">
+            <span id="timer-display">{{ match_data.minute }}'</span>
+            <span id="added-time" style="display: none;"></span>
+        </div>
+        
+        <div class="match-score">
+            <div class="score-display">
+                <span class="score-number" id="my-score">{{ match_data.my_score }}</span>
+                <span class="score-separator">-</span>
+                <span class="score-number" id="opponent-score">{{ match_data.opponent_score }}</span>
+            </div>
+            <div class="score-teams">
+                <div class="team-score-section">
+                    {% set my_logo = TEAM_LOGOS.get(my_team, TEAM_LOGOS_FALLBACK.get(my_team, '')) %}
+                    {% if my_logo %}
+                    <img src="{{ my_logo }}" alt="{{ my_team }}" class="team-logo-tiny">
+                    {% else %}
+                    <div class="team-logo-placeholder-tiny">⚽</div>
+                    {% endif %}
+                    <span class="team-name-small">{{ my_team }}</span>
+                    <div class="goals-list" id="my-goals-list">
+                        {% for goal in match_data.goals %}
+                            {% if goal.team == my_team %}
+                                <div class="goal-item">{{ goal.scorer }} {{ goal.minute }}'</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="team-score-section">
+                    {% set opp_logo = TEAM_LOGOS.get(opponent_team, TEAM_LOGOS_FALLBACK.get(opponent_team, '')) %}
+                    {% if opp_logo %}
+                    <img src="{{ opp_logo }}" alt="{{ opponent_team }}" class="team-logo-tiny">
+                    {% else %}
+                    <div class="team-logo-placeholder-tiny">⚽</div>
+                    {% endif %}
+                    <span class="team-name-small">{{ opponent_team }}</span>
+                    <div class="goals-list" id="opponent-goals-list">
+                        {% for goal in match_data.goals %}
+                            {% if goal.team == opponent_team %}
+                                <div class="goal-item">{{ goal.scorer }} {{ goal.minute }}'</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="match-stats">
+            <div class="stat-row">
+                <div class="stat-label">⚽ Владение мячом</div>
+                <div class="stat-bars">
+                    <div class="stat-bar-container">
+                        <div class="stat-bar my-bar" style="width: {{ match_data.possession_my }}%"></div>
+                        <span class="stat-value">{{ match_data.possession_my }}%</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar opponent-bar" style="width: {{ match_data.possession_opponent }}%"></div>
+                        <span class="stat-value">{{ match_data.possession_opponent }}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-row">
+                <div class="stat-label">🎯 Удары</div>
+                <div class="stat-bars">
+                    <div class="stat-bar-container">
+                        <div class="stat-bar my-bar" style="width: {{ shots_my_percent }}%"></div>
+                        <span class="stat-value">{{ match_data.shots_my }}</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar opponent-bar" style="width: {{ shots_opponent_percent }}%"></div>
+                        <span class="stat-value">{{ match_data.shots_opponent }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-row">
+                <div class="stat-label">✅ Удары в створ</div>
+                <div class="stat-bars">
+                    <div class="stat-bar-container">
+                        <div class="stat-bar my-bar" style="width: {{ shots_on_target_my_percent }}%"></div>
+                        <span class="stat-value">{{ match_data.shots_on_target_my }}</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar opponent-bar" style="width: {{ shots_on_target_opponent_percent }}%"></div>
+                        <span class="stat-value">{{ match_data.shots_on_target_opponent }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-row">
+                <div class="stat-label">📊 xG (Expected Goals)</div>
+                <div class="stat-bars">
+                    <div class="stat-bar-container">
+                        <div class="stat-bar my-bar" style="width: {{ xg_my_percent }}%"></div>
+                        <span class="stat-value">{{ "%.2f"|format(match_data.xg_my) }}</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar opponent-bar" style="width: {{ xg_opponent_percent }}%"></div>
+                        <span class="stat-value">{{ "%.2f"|format(match_data.xg_opponent) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="match-controls">
+            {% if match_data.half == 1 and match_data.minute >= 47 %}
+                <button class="btn btn-success" id="start-second-half-btn" onclick="startSecondHalf()" style="font-size: 1.2rem; padding: 1rem 2rem;">⏱️ Начать 2 тайм</button>
+            {% elif match_data.half == 2 and match_data.minute >= 92 %}
+                <button class="btn btn-success" id="end-match-btn" onclick="endMatch()" style="font-size: 1.2rem; padding: 1rem 2rem;">✅ Завершить матч</button>
+            {% else %}
+                <button class="btn btn-secondary" onclick="showSubstitutions()">🔄 Замены</button>
+            {% endif %}
+        </div>
+        
+        <div id="goal-notification" class="goal-notification" style="display: none;">
+            <div class="goal-text">
+                <div class="goal-scorer" id="goal-scorer"></div>
+                <div class="goal-minute" id="goal-minute"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentMinute = {{ match_data.minute }};
+let currentHalf = {{ match_data.half }};
+let timerInterval = null;
+let isRunning = false;
+let lastGoalCount = {{ match_data.goals|length }};
+
+// Обновляем отображение таймера при загрузке страницы
+const timerDisplay = document.getElementById('timer-display');
+const addedTimeEl = document.getElementById('added-time');
+
+// Убеждаемся, что таймер правильно отображается для второго тайма
+if (currentHalf === 2 && currentMinute < 46) {
+    currentMinute = 46;
+    if (timerDisplay) {
+        timerDisplay.textContent = '46' + "'";
+    }
+}
+
+// Проверяем, не закончился ли уже матч и показываем добавочное время если нужно
+if (currentHalf === 1) {
+    if (currentMinute >= 47) {
+        isRunning = false;
+        if (addedTimeEl && currentMinute > 45) {
+            addedTimeEl.textContent = '+' + (currentMinute - 45);
+            addedTimeEl.style.display = 'inline';
+        }
+        showStartSecondHalfButton();
+    } else {
+        isRunning = true;
+        if (currentMinute > 45 && addedTimeEl) {
+            addedTimeEl.textContent = '+' + (currentMinute - 45);
+            addedTimeEl.style.display = 'inline';
+        }
+    }
+} else if (currentHalf === 2) {
+    if (currentMinute >= 92) {
+        isRunning = false;
+        if (addedTimeEl && currentMinute > 90) {
+            addedTimeEl.textContent = '+' + (currentMinute - 90);
+            addedTimeEl.style.display = 'inline';
+        }
+        showEndMatchButton();
+    } else {
+        isRunning = true;
+        if (currentMinute > 90 && addedTimeEl) {
+            addedTimeEl.textContent = '+' + (currentMinute - 90);
+            addedTimeEl.style.display = 'inline';
+        }
+    }
+} else {
+    isRunning = true;
+}
+
+function updateTimer() {
+    if (!isRunning) return;
+    
+    currentMinute++;
+    
+    // Обновляем отображение
+    const timerDisplay = document.getElementById('timer-display');
+    const addedTimeEl = document.getElementById('added-time');
+    
+    if (currentHalf === 1) {
+        if (currentMinute <= 45) {
+            timerDisplay.textContent = currentMinute + "'";
+            if (addedTimeEl) addedTimeEl.style.display = 'none';
+        } else {
+            timerDisplay.textContent = "45'";
+            if (addedTimeEl) {
+                const added = currentMinute - 45;
+                addedTimeEl.textContent = "+" + added;
+                addedTimeEl.style.display = 'inline';
+            }
+            // Останавливаем таймер после 45+2 и показываем кнопку
+            if (currentMinute >= 47) {
+                isRunning = false;
+                clearInterval(timerInterval);
+                showStartSecondHalfButton();
+                return;
+            }
+        }
+    } else if (currentHalf === 2) {
+        if (currentMinute <= 90) {
+            timerDisplay.textContent = currentMinute + "'";
+            if (addedTimeEl) addedTimeEl.style.display = 'none';
+        } else {
+            timerDisplay.textContent = "90'";
+            if (addedTimeEl) {
+                const added = currentMinute - 90;
+                addedTimeEl.textContent = "+" + added;
+                addedTimeEl.style.display = 'inline';
+            }
+            // Останавливаем таймер после 90+2 и показываем кнопку ОК
+            if (currentMinute >= 92) {
+                isRunning = false;
+                clearInterval(timerInterval);
+                showEndMatchButton();
+                return;
+            }
+        }
+    }
+    
+    // Отправляем на сервер каждую секунду
+    fetch('{{ url_for("match_action") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'tick',
+            minute: currentMinute,
+            half: currentHalf
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.match_data) {
+            updateStats(data.match_data);
+            checkNewGoals(data.match_data);
+        }
+    });
+}
+
+function updateStats(matchData) {
+    // Обновляем счет
+    document.getElementById('my-score').textContent = matchData.my_score;
+    document.getElementById('opponent-score').textContent = matchData.opponent_score;
+    
+    // Обновляем таймер
+    currentMinute = matchData.minute;
+    currentHalf = matchData.half;
+    
+    // Убеждаемся, что таймер правильно отображается для второго тайма
+    if (currentHalf === 2 && currentMinute < 46) {
+        currentMinute = 46;
+    }
+    
+    // Обновляем отображение таймера
+    if (timerDisplay) {
+        if (currentHalf === 1) {
+            if (currentMinute <= 45) {
+                timerDisplay.textContent = currentMinute + "'";
+                if (addedTimeEl) addedTimeEl.style.display = 'none';
+            } else {
+                timerDisplay.textContent = "45'";
+                if (addedTimeEl) {
+                    addedTimeEl.textContent = "+" + (currentMinute - 45);
+                    addedTimeEl.style.display = 'inline';
+                }
+            }
+        } else if (currentHalf === 2) {
+            if (currentMinute <= 90) {
+                timerDisplay.textContent = currentMinute + "'";
+                if (addedTimeEl) addedTimeEl.style.display = 'none';
+            } else {
+                timerDisplay.textContent = "90'";
+                if (addedTimeEl) {
+                    addedTimeEl.textContent = "+" + (currentMinute - 90);
+                    addedTimeEl.style.display = 'inline';
+                }
+            }
+        }
+    }
+    
+    // Обновляем статистику без перезагрузки страницы
+    updateStatBars(matchData);
+    
+    // Обновляем список голов
+    updateGoalsList(matchData);
+    
+    // Проверяем, нужно ли показать кнопки
+    if (matchData.half === 1 && matchData.minute >= 47) {
+        showStartSecondHalfButton();
+    } else if (matchData.half === 2 && matchData.minute >= 92) {
+        showEndMatchButton();
+    }
+}
+
+function showStartSecondHalfButton() {
+    const controls = document.querySelector('.match-controls');
+    if (controls && !document.getElementById('start-second-half-btn')) {
+        controls.innerHTML = '<button class="btn btn-success" id="start-second-half-btn" onclick="startSecondHalf()" style="font-size: 1.2rem; padding: 1rem 2rem;">⏱️ Начать 2 тайм</button>';
+    }
+}
+
+function showEndMatchButton() {
+    const controls = document.querySelector('.match-controls');
+    if (controls && !document.getElementById('end-match-btn')) {
+        controls.innerHTML = '<button class="btn btn-success" id="end-match-btn" onclick="endMatch()" style="font-size: 1.2rem; padding: 1rem 2rem;">✅ Завершить матч</button>';
+    }
+}
+
+function updateStatBars(matchData) {
+    // Обновляем владение
+    const possessionBars = document.querySelectorAll('.stat-row:first-child .stat-bar');
+    if (possessionBars.length >= 2) {
+        possessionBars[0].style.width = matchData.possession_my + '%';
+        possessionBars[1].style.width = matchData.possession_opponent + '%';
+        const possessionValues = document.querySelectorAll('.stat-row:first-child .stat-value');
+        if (possessionValues.length >= 2) {
+            possessionValues[0].textContent = matchData.possession_my + '%';
+            possessionValues[1].textContent = matchData.possession_opponent + '%';
+        }
+    }
+    
+    // Обновляем удары
+    const totalShots = Math.max(matchData.shots_my + matchData.shots_opponent, 1);
+    const shotsMyPercent = (matchData.shots_my / totalShots) * 100;
+    const shotsOppPercent = (matchData.shots_opponent / totalShots) * 100;
+    const shotsBars = document.querySelectorAll('.stat-row:nth-child(2) .stat-bar');
+    if (shotsBars.length >= 2) {
+        shotsBars[0].style.width = shotsMyPercent + '%';
+        shotsBars[1].style.width = shotsOppPercent + '%';
+        const shotsValues = document.querySelectorAll('.stat-row:nth-child(2) .stat-value');
+        if (shotsValues.length >= 2) {
+            shotsValues[0].textContent = matchData.shots_my;
+            shotsValues[1].textContent = matchData.shots_opponent;
+        }
+    }
+    
+    // Обновляем удары в створ
+    const totalShotsOnTarget = Math.max(matchData.shots_on_target_my + matchData.shots_on_target_opponent, 1);
+    const shotsOnTargetMyPercent = (matchData.shots_on_target_my / totalShotsOnTarget) * 100;
+    const shotsOnTargetOppPercent = (matchData.shots_on_target_opponent / totalShotsOnTarget) * 100;
+    const shotsOnTargetBars = document.querySelectorAll('.stat-row:nth-child(3) .stat-bar');
+    if (shotsOnTargetBars.length >= 2) {
+        shotsOnTargetBars[0].style.width = shotsOnTargetMyPercent + '%';
+        shotsOnTargetBars[1].style.width = shotsOnTargetOppPercent + '%';
+        const shotsOnTargetValues = document.querySelectorAll('.stat-row:nth-child(3) .stat-value');
+        if (shotsOnTargetValues.length >= 2) {
+            shotsOnTargetValues[0].textContent = matchData.shots_on_target_my;
+            shotsOnTargetValues[1].textContent = matchData.shots_on_target_opponent;
+        }
+    }
+    
+    // Обновляем xG
+    const totalXg = Math.max(matchData.xg_my + matchData.xg_opponent, 0.1);
+    const xgMyPercent = (matchData.xg_my / totalXg) * 100;
+    const xgOppPercent = (matchData.xg_opponent / totalXg) * 100;
+    const xgBars = document.querySelectorAll('.stat-row:nth-child(4) .stat-bar');
+    if (xgBars.length >= 2) {
+        xgBars[0].style.width = xgMyPercent + '%';
+        xgBars[1].style.width = xgOppPercent + '%';
+        const xgValues = document.querySelectorAll('.stat-row:nth-child(4) .stat-value');
+        if (xgValues.length >= 2) {
+            xgValues[0].textContent = matchData.xg_my.toFixed(2);
+            xgValues[1].textContent = matchData.xg_opponent.toFixed(2);
+        }
+    }
+}
+
+function checkNewGoals(matchData) {
+    const goals = matchData.goals || [];
+    
+    // Проверяем, есть ли новые голы
+    if (goals.length > lastGoalCount) {
+        const newGoal = goals[goals.length - 1];
+        showGoalNotification(newGoal);
+        updateGoalsList(matchData);
+        lastGoalCount = goals.length;
+    }
+}
+
+function updateGoalsList(matchData) {
+    const myGoalsList = document.getElementById('my-goals-list');
+    const opponentGoalsList = document.getElementById('opponent-goals-list');
+    
+    if (myGoalsList && opponentGoalsList) {
+        myGoalsList.innerHTML = '';
+        opponentGoalsList.innerHTML = '';
+        
+        matchData.goals.forEach(goal => {
+            const goalItem = document.createElement('div');
+            goalItem.className = 'goal-item';
+            goalItem.textContent = goal.scorer + ' ' + goal.minute + "'";
+            
+            if (goal.team === '{{ my_team }}') {
+                myGoalsList.appendChild(goalItem);
+            } else {
+                opponentGoalsList.appendChild(goalItem);
+            }
+        });
+    }
+}
+
+function showGoalNotification(goal) {
+    const notification = document.getElementById('goal-notification');
+    const scorer = document.getElementById('goal-scorer');
+    const minute = document.getElementById('goal-minute');
+    
+    scorer.textContent = goal.scorer + " " + goal.minute + "'";
+    minute.textContent = goal.team;
+    
+    notification.style.display = 'flex';
+    
+    // Обновляем счет сразу
+    const myScoreEl = document.getElementById('my-score');
+    const oppScoreEl = document.getElementById('opponent-score');
+    
+    if (goal.team === '{{ my_team }}') {
+        myScoreEl.textContent = parseInt(myScoreEl.textContent) + 1;
+    } else {
+        oppScoreEl.textContent = parseInt(oppScoreEl.textContent) + 1;
+    }
+    
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+}
+
+function startSecondHalf() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    
+    fetch('{{ url_for("match_action") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'start_second_half'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.match_data) {
+            // Обновляем переменные без перезагрузки страницы
+            currentHalf = 2;
+            currentMinute = 46;
+            
+            // Обновляем отображение таймера
+            const timerDisplay = document.getElementById('timer-display');
+            const addedTimeEl = document.getElementById('added-time');
+            if (timerDisplay) {
+                timerDisplay.textContent = '46' + "'";
+            }
+            if (addedTimeEl) {
+                addedTimeEl.style.display = 'none';
+            }
+            
+            // Обновляем кнопку
+            const controls = document.querySelector('.match-controls');
+            if (controls) {
+                controls.innerHTML = '<button class="btn btn-secondary" onclick="showSubstitutions()">🔄 Замены</button>';
+            }
+            
+            // Запускаем таймер снова
+            isRunning = true;
+            timerInterval = setInterval(updateTimer, 333);
+        }
+    });
+}
+
+function showSeasonEndModal(seasonData) {
+    // Создаем модальное окно
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        animation: fadeIn 0.5s ease;
+    `;
+
+    const position = seasonData.final_position;
+    let emoji = '🥇';
+    let message = '';
+
+    if (position === 1) {
+        message = 'Чемпион Англии!';
+        emoji = '🥇';
+    } else if (position === 2) {
+        message = 'Второе место!';
+        emoji = '🥈';
+    } else if (position === 3) {
+        message = 'Третье место!';
+        emoji = '🥉';
+    } else if (position >= 4 && position <= 7) {
+        message = 'Участие в Лиге Европы!';
+        emoji = '🌟';
+    } else if (position >= 18) {
+        message = 'Вылет в Чемпионшип!';
+        emoji = '📉';
+    } else {
+        message = 'Сезон завершен!';
+        emoji = '⚽';
+    }
+
+    modal.innerHTML = `
+        <div style="
+            background: linear-gradient(135deg, var(--primary-color), var(--light-blue));
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: slideUp 0.5s ease;
+        ">
+            <h1 style="color: white; font-size: 3rem; margin-bottom: 1rem;">${emoji}</h1>
+            <h2 style="color: white; font-size: 2rem; margin-bottom: 0.5rem;">Поздравляем!</h2>
+            <p style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">
+                Вы заняли <strong>${position}${getOrdinalSuffix(position)}</strong> место!
+            </p>
+            <p style="color: white; font-size: 1.2rem; margin-bottom: 2rem;">
+                ${message}
+            </p>
+            <button onclick="continueToResults()" style="
+                background: white;
+                color: var(--primary-color);
+                border: none;
+                padding: 1rem 2rem;
+                border-radius: 10px;
+                font-size: 1.1rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                Посмотреть итоги сезона
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Добавляем анимации
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function getOrdinalSuffix(position) {
+    if (position === 1) return '-е';
+    if (position >= 2 && position <= 4) return '-е';
+    return '-е';
+}
+
+function continueToResults() {
+    window.location.href = '{{ url_for("match_results") }}';
+}
+
+function endMatch() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    
+    fetch('{{ url_for("match_action") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'end_match'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.season_end) {
+                // Показываем поздравление с итоговым местом
+                showSeasonEndModal(data.season_end_data);
+            } else {
+                window.location.href = '{{ url_for("match_results") }}';
+            }
+        }
+    });
+}
+
+function showSubstitutions() {
+    alert('🔄 Функция замен в разработке');
+}
+
+// Запускаем таймер автоматически (в 3 раза быстрее: 333ms = 1 игровая минута)
+if (isRunning) {
+    timerInterval = setInterval(updateTimer, 333);
+}
+</script>
+{% endblock %}
+

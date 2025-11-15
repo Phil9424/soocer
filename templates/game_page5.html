@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="game-page">
+        <div class="team-header">
+            <h1>🏟️ {{ data.stadium }}</h1>
+        </div>
+        
+        <div class="stadium-container">
+            <div class="stadium-section">
+                <h3>👥 Вместимость трибун</h3>
+                <div class="stadium-row">
+                    <span class="stadium-label">Северная трибуна:</span>
+                    <span class="stadium-value">{{ "{:,}".format(data.stadium_data.north) }} мест</span>
+                </div>
+                <div class="stadium-row">
+                    <span class="stadium-label">Южная трибуна:</span>
+                    <span class="stadium-value">{{ "{:,}".format(data.stadium_data.south) }} мест</span>
+                </div>
+                <div class="stadium-row">
+                    <span class="stadium-label">Западная трибуна:</span>
+                    <span class="stadium-value">{{ "{:,}".format(data.stadium_data.west) }} мест</span>
+                </div>
+                <div class="stadium-row">
+                    <span class="stadium-label">Восточная трибуна:</span>
+                    <span class="stadium-value">{{ "{:,}".format(data.stadium_data.east) }} мест</span>
+                </div>
+                <div class="stadium-row" style="background: rgba(59, 130, 246, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 2px solid var(--light-blue);">
+                    <span class="stadium-label"><strong>🎯 Общая вместительность:</strong></span>
+                    <span class="stadium-value"><strong style="color: var(--bright-green); font-size: 1.3rem;">{{ "{:,}".format(data.stadium_data.total) }} мест</strong></span>
+                </div>
+            </div>
+            
+            <div class="stadium-section">
+                <h3>💰 Ценообразование</h3>
+                <div class="stadium-row">
+                    <span class="stadium-label">💵 Стоимость билета:</span>
+                    <span class="stadium-value">£{{ data.stadium_data.ticket_price }}</span>
+                </div>
+            </div>
+            
+            <div class="stadium-buttons" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="alert('Функция в разработке')">🏗️ Построить стадион</button>
+                <button class="btn btn-secondary" onclick="alert('Функция в разработке')">💵 Изменить стоимость билета</button>
+            </div>
+        </div>
+        
+        <div class="page-navigation">
+            <a href="{{ url_for('game_page', page=4) }}" class="nav-btn">◀ Назад</a>
+            <span class="page-indicator">📄 5/5</span>
+            <a href="{{ url_for('game_page', page=1) }}" class="nav-btn">Вперёд ▶</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

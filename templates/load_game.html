@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="load-game-page">
+        <h1>💾 Загрузить игру</h1>
+        
+        {% if saves %}
+        <div class="saves-list">
+            {% for save in saves %}
+            <div class="save-item">
+                <div class="save-info">
+                    <strong>🏆 {{ save.team }}</strong>
+                    <span class="save-date">📅 {{ save.timestamp }}</span>
+                </div>
+                <a href="{{ url_for('load_game_file', filename=save.filename) }}" class="btn btn-success">🚀 Загрузить</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card" style="text-align: center; padding: 3rem;">
+            <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem;">
+                💾 Нет сохраненных игр
+            </p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">🏠 Назад в меню</a>
+        </div>
+        {% endif %}
+        
+        {% if saves %}
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← Назад в меню</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
