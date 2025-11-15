@@ -1109,113 +1109,113 @@ def match_action():
         data = request.json
         action = data.get('action')
 
-    match_data = session['match_data']
-    game_data = session['game_data']
+        match_data = session['match_data']
+        game_data = session['game_data']
 
-    # Получаем составы команд (нужно для определения бомбардиров)
-    my_team = game_data['team_name']
-    opponent_team = game_data['next_opponent']
+        # Получаем составы команд (нужно для определения бомбардиров)
+        my_team = game_data['team_name']
+        opponent_team = game_data['next_opponent']
 
-    # Получаем состав пользователя
-    my_squad = game_data['squad']
-    selected_players = game_data.get('selected_players', [])
+        # Получаем состав пользователя
+        my_squad = game_data['squad']
+        selected_players = game_data.get('selected_players', [])
 
-    # Если выбрано меньше 11 игроков, добавляем случайных
-    if len(selected_players) < 11:
-        available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
-        needed = 11 - len(selected_players)
-        selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
+        # Если выбрано меньше 11 игроков, добавляем случайных
+        if len(selected_players) < 11:
+            available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
+            needed = 11 - len(selected_players)
+            selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
 
-    my_lineup = []
-    for player_name in selected_players[:11]:
-        player_info = next((p for p in my_squad if p['name'] == player_name), None)
-        if player_info:
-            my_lineup.append(player_info)
+        my_lineup = []
+        for player_name in selected_players[:11]:
+            player_info = next((p for p in my_squad if p['name'] == player_name), None)
+            if player_info:
+                my_lineup.append(player_info)
 
-    # Генерируем состав соперника
-    opponent_squad = []
-    if opponent_team in SQUADS_2007_08:
-        for player_data in SQUADS_2007_08[opponent_team]:
-            if isinstance(player_data, tuple):
-                player_name, rating = player_data
-            else:
-                player_name = player_data
-                rating = 70
-            opponent_squad.append({
-                "name": player_name,
-                "rating": rating
-            })
+        # Генерируем состав соперника
+        opponent_squad = []
+        if opponent_team in SQUADS_2007_08:
+            for player_data in SQUADS_2007_08[opponent_team]:
+                if isinstance(player_data, tuple):
+                    player_name, rating = player_data
+                else:
+                    player_name = player_data
+                    rating = 70
+                opponent_squad.append({
+                    "name": player_name,
+                    "rating": rating
+                })
 
-    opponent_squad_sorted = sorted(opponent_squad, key=lambda x: x['rating'], reverse=True)
-    opponent_lineup = opponent_squad_sorted[:11]
+        opponent_squad_sorted = sorted(opponent_squad, key=lambda x: x['rating'], reverse=True)
+        opponent_lineup = opponent_squad_sorted[:11]
     
-    if action == 'tick':
-        # Обновление таймера
-        minute = data.get('minute', 0)
-        half = data.get('half', 1)
-        
-        match_data['minute'] = minute
-        match_data['half'] = half
-        
-        # Генерируем события (голы, статистика) - каждую секунду
-        # Владение - медленно меняется
-        if minute % 5 == 0:
-            match_data['possession_my'] = max(30, min(70, match_data['possession_my'] + random.randint(-2, 2)))
-            match_data['possession_opponent'] = 100 - match_data['possession_my']
-        
-        # Удары - случайно (увеличена вероятность)
-        if random.random() < 0.12:  # 12% вероятность каждую секунду
-            if random.random() < 0.5:
-                match_data['shots_my'] += 1
-                if random.random() < 0.5:  # 50% попаданий в створ
-                    match_data['shots_on_target_my'] += 1
-                    match_data['xg_my'] += round(random.uniform(0.08, 0.25), 2)
-            else:
-                match_data['shots_opponent'] += 1
-                if random.random() < 0.5:  # 50% попаданий в створ
-                    match_data['shots_on_target_opponent'] += 1
-                    match_data['xg_opponent'] += round(random.uniform(0.08, 0.25), 2)
-        
-        # Голы (вероятность зависит от xG и накопленного xG) - увеличена вероятность
-        goal_prob_my = min(0.08, match_data['xg_my'] * 0.4)  # Максимум 8% в секунду
-        if random.random() < goal_prob_my and match_data['xg_my'] > 0.15:  # Минимальный порог снижен до 0.15
-            match_data['my_score'] += 1
-            scorer = select_goal_scorer(game_data, my_lineup)
-            if not scorer or scorer == "":
-                scorer = "Неизвестный игрок"  # Fallback
-            match_data['goals'].append({
-                'team': match_data['my_team'],
-                'scorer': scorer,
-                'minute': minute
-            })
-            match_data['xg_my'] = 0.0  # Сбрасываем после гола
-        
-        goal_prob_opp = min(0.08, match_data['xg_opponent'] * 0.4)  # Максимум 8% в секунду
-        if random.random() < goal_prob_opp and match_data['xg_opponent'] > 0.15:  # Минимальный порог снижен до 0.15
-            match_data['opponent_score'] += 1
-            scorer = select_opponent_goal_scorer(match_data['opponent_team'], opponent_lineup)
-            if not scorer or scorer == "":
-                scorer = "Неизвестный игрок"  # Fallback
-            match_data['goals'].append({
-                'team': match_data['opponent_team'],
-                'scorer': scorer,
-                'minute': minute
-            })
-            match_data['xg_opponent'] = 0.0
-        
-    elif action == 'start_second_half':
-        match_data['half'] = 2
-        match_data['minute'] = 46
-    
-    elif action == 'end_match':
-        # Сохраняем результаты всего тура
-        if 'match_results' not in session:
-            session['match_results'] = []
+        if action == 'tick':
+            # Обновление таймера
+            minute = data.get('minute', 0)
+            half = data.get('half', 1)
 
-        current_round = game_data.get('current_round', 1)
-        round_results = []
+            match_data['minute'] = minute
+            match_data['half'] = half
 
-        # Добавляем результат нашего матча
+            # Генерируем события (голы, статистика) - каждую секунду
+            # Владение - медленно меняется
+            if minute % 5 == 0:
+                match_data['possession_my'] = max(30, min(70, match_data['possession_my'] + random.randint(-2, 2)))
+                match_data['possession_opponent'] = 100 - match_data['possession_my']
+
+            # Удары - случайно (увеличена вероятность)
+            if random.random() < 0.12:  # 12% вероятность каждую секунду
+                if random.random() < 0.5:
+                    match_data['shots_my'] += 1
+                    if random.random() < 0.5:  # 50% попаданий в створ
+                        match_data['shots_on_target_my'] += 1
+                        match_data['xg_my'] += round(random.uniform(0.08, 0.25), 2)
+                else:
+                    match_data['shots_opponent'] += 1
+                    if random.random() < 0.5:  # 50% попаданий в створ
+                        match_data['shots_on_target_opponent'] += 1
+                        match_data['xg_opponent'] += round(random.uniform(0.08, 0.25), 2)
+
+            # Голы (вероятность зависит от xG и накопленного xG) - увеличена вероятность
+            goal_prob_my = min(0.08, match_data['xg_my'] * 0.4)  # Максимум 8% в секунду
+            if random.random() < goal_prob_my and match_data['xg_my'] > 0.15:  # Минимальный порог снижен до 0.15
+                match_data['my_score'] += 1
+                scorer = select_goal_scorer(game_data, my_lineup)
+                if not scorer or scorer == "":
+                    scorer = "Неизвестный игрок"  # Fallback
+                match_data['goals'].append({
+                    'team': match_data['my_team'],
+                    'scorer': scorer,
+                    'minute': minute
+                })
+                match_data['xg_my'] = 0.0  # Сбрасываем после гола
+
+            goal_prob_opp = min(0.08, match_data['xg_opponent'] * 0.4)  # Максимум 8% в секунду
+            if random.random() < goal_prob_opp and match_data['xg_opponent'] > 0.15:  # Минимальный порог снижен до 0.15
+                match_data['opponent_score'] += 1
+                scorer = select_opponent_goal_scorer(match_data['opponent_team'], opponent_lineup)
+                if not scorer or scorer == "":
+                    scorer = "Неизвестный игрок"  # Fallback
+                match_data['goals'].append({
+                    'team': match_data['opponent_team'],
+                    'scorer': scorer,
+                    'minute': minute
+                })
+                match_data['xg_opponent'] = 0.0
+
+        elif action == 'start_second_half':
+            match_data['half'] = 2
+            match_data['minute'] = 46
+
+        elif action == 'end_match':
+            # Сохраняем результаты всего тура
+            if 'match_results' not in session:
+                session['match_results'] = []
+
+            current_round = game_data.get('current_round', 1)
+            round_results = []
+
+            # Добавляем результат нашего матча
         my_result = {
             'home_team': match_data['my_team'],
             'away_team': match_data['opponent_team'],
