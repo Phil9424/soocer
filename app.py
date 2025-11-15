@@ -1101,12 +1101,13 @@ def match():
 
 @app.route('/match_action', methods=['POST'])
 def match_action():
-    if 'game_data' not in session or 'match_data' not in session:
-        return jsonify({"success": False})
+    try:
+        if 'game_data' not in session or 'match_data' not in session:
+            return jsonify({"success": False})
 
-    import random
-    data = request.json
-    action = data.get('action')
+        import random
+        data = request.json
+        action = data.get('action')
 
     match_data = session['match_data']
     game_data = session['game_data']
@@ -1180,6 +1181,8 @@ def match_action():
         if random.random() < goal_prob_my and match_data['xg_my'] > 0.15:  # Минимальный порог снижен до 0.15
             match_data['my_score'] += 1
             scorer = select_goal_scorer(game_data, my_lineup)
+            if not scorer or scorer == "":
+                scorer = "Неизвестный игрок"  # Fallback
             match_data['goals'].append({
                 'team': match_data['my_team'],
                 'scorer': scorer,
@@ -1191,6 +1194,8 @@ def match_action():
         if random.random() < goal_prob_opp and match_data['xg_opponent'] > 0.15:  # Минимальный порог снижен до 0.15
             match_data['opponent_score'] += 1
             scorer = select_opponent_goal_scorer(match_data['opponent_team'], opponent_lineup)
+            if not scorer or scorer == "":
+                scorer = "Неизвестный игрок"  # Fallback
             match_data['goals'].append({
                 'team': match_data['opponent_team'],
                 'scorer': scorer,
@@ -1353,12 +1358,17 @@ def match_action():
                 'team_name': game_data['team_name']
             }
     
-    session['match_data'] = match_data
-    response_data = {"success": True, "match_data": match_data}
-    if is_season_end:
-        response_data["season_end"] = True
-        response_data["season_end_data"] = session['season_end_data']
-    return jsonify(response_data)
+        session['match_data'] = match_data
+        response_data = {"success": True, "match_data": match_data}
+        if is_season_end:
+            response_data["season_end"] = True
+            response_data["season_end_data"] = session['season_end_data']
+        return jsonify(response_data)
+    except Exception as e:
+        print(f"Error in match_action: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/match_results')
 def match_results():
