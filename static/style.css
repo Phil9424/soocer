@@ -1688,15 +1688,15 @@ body::before {
 
 /* Стили для логотипов команд */
 .team-logo-small {
-    width: 8px !important;
-    height: 8px !important;
+    width: 10px !important;
+    height: 10px !important;
     object-fit: contain !important;
-    margin-bottom: 0.05rem !important;
+    margin-bottom: 0.25rem !important;
 }
 
 .team-logo-placeholder {
-    width: 8px !important;
-    height: 8px !important;
+    width: 10px !important;
+    height: 10px !important;
     border-radius: 50% !important;
     background: var(--light-blue) !important;
     display: flex !important;
@@ -1714,15 +1714,15 @@ body::before {
 }
 
 .team-logo-tiny {
-    width: 6px !important;
-    height: 6px !important;
+    width: 10px !important;
+    height: 10px !important;
     object-fit: contain !important;
-    margin-bottom: 0.05rem !important;
+    margin-bottom: 0.25rem !important;
 }
 
 .team-logo-placeholder-tiny {
-    width: 6px !important;
-    height: 6px !important;
+    width: 10px !important;
+    height: 10px !important;
     border-radius: 50% !important;
     background: var(--light-blue) !important;
     display: flex !important;
