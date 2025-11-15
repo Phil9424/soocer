@@ -1101,23 +1101,36 @@ def match():
 
 @app.route('/match_action', methods=['POST'])
 def match_action():
+    # Расширяем try блок на всю функцию для перехвата всех исключений
     try:
-        if 'game_data' not in session or 'match_data' not in session:
-            return jsonify({"success": False})
+        # Проверяем наличие необходимых данных в сессии
+        if 'game_data' not in session:
+            print("DEBUG: game_data not in session")
+            return jsonify({"success": False, "error": "No game data in session"})
+
+        if 'match_data' not in session:
+            print("DEBUG: match_data not in session")
+            return jsonify({"success": False, "error": "No match data in session"})
 
         import random
 
+        # Безопасно получаем JSON данные
         try:
-            data = request.json
+            data = request.get_json()
+            print(f"DEBUG: Received data: {data}")
         except Exception as e:
+            print(f"DEBUG: JSON parsing error: {e}")
             return jsonify({"success": False, "error": f"Invalid JSON: {str(e)}"})
 
-        action = data.get('action') if data else None
-
         if not data:
-            return jsonify({"success": False, "error": "Invalid JSON"})
+            print("DEBUG: data is None or empty")
+            return jsonify({"success": False, "error": "No data provided"})
+
+        action = data.get('action')
+        print(f"DEBUG: action = {action}")
 
         if not action:
+            print("DEBUG: action is None or empty")
             return jsonify({"success": False, "error": "No action provided"})
 
         match_data = session['match_data']
@@ -1433,6 +1446,18 @@ def top_scorers():
 @app.route('/favicon.ico')
 def favicon():
     return '', 204  # No Content
+
+# Глобальный обработчик ошибок для match_action маршрута
+@app.errorhandler(500)
+def handle_500(error):
+    # Проверяем, является ли запрос к match_action
+    if request.path == '/match_action':
+        print(f"Global 500 error handler for match_action: {error}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "error": "Internal server error"})
+    # Для других маршрутов возвращаем стандартную ошибку
+    return error
 
 if __name__ == '__main__':
     app.run(debug=True)
