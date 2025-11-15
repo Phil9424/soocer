@@ -1104,76 +1104,64 @@ def match_action():
     # Расширяем try блок на всю функцию для перехвата всех исключений
     try:
         # Проверяем наличие необходимых данных в сессии
-        if 'game_data' not in session:
-            print("DEBUG: game_data not in session")
-            return jsonify({"success": False, "error": "No game data in session"})
-
-        if 'match_data' not in session:
-            print("DEBUG: match_data not in session")
-            return jsonify({"success": False, "error": "No match data in session"})
+        if 'game_data' not in session or 'match_data' not in session:
+            return jsonify({"success": False, "error": "Session not initialized"})
 
         import random
 
         # Безопасно получаем JSON данные
         try:
             data = request.get_json()
-            print(f"DEBUG: Received data: {data}")
         except Exception as e:
-            print(f"DEBUG: JSON parsing error: {e}")
             return jsonify({"success": False, "error": f"Invalid JSON: {str(e)}"})
 
         if not data:
-            print("DEBUG: data is None or empty")
             return jsonify({"success": False, "error": "No data provided"})
 
         action = data.get('action')
-        print(f"DEBUG: action = {action}")
-
         if not action:
-            print("DEBUG: action is None or empty")
             return jsonify({"success": False, "error": "No action provided"})
 
         match_data = session['match_data']
         game_data = session['game_data']
 
-        # Получаем составы команд (нужно для определения бомбардиров)
-        my_team = game_data['team_name']
-        opponent_team = game_data['next_opponent']
-
-        # Получаем состав пользователя
-        my_squad = game_data['squad']
-        selected_players = game_data.get('selected_players', [])
-
-        # Если выбрано меньше 11 игроков, добавляем случайных
-        if len(selected_players) < 11:
-            available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
-            needed = 11 - len(selected_players)
-            selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
-
-        my_lineup = []
-        for player_name in selected_players[:11]:
-            player_info = next((p for p in my_squad if p['name'] == player_name), None)
-            if player_info:
-                my_lineup.append(player_info)
-
-        # Генерируем состав соперника
-        opponent_squad = []
-        if opponent_team in SQUADS_2007_08:
-            for player_data in SQUADS_2007_08[opponent_team]:
-                if isinstance(player_data, tuple):
-                    player_name, rating = player_data
-                else:
-                    player_name = player_data
-                    rating = 70
-                opponent_squad.append({
-                    "name": player_name,
-                    "rating": rating
-                })
-
-        opponent_squad_sorted = sorted(opponent_squad, key=lambda x: x['rating'], reverse=True)
-        opponent_lineup = opponent_squad_sorted[:11]
-    
         if action == 'tick':
+            # Получаем составы команд (нужно для определения бомбардиров)
+            my_team = game_data['team_name']
+            opponent_team = game_data['next_opponent']
+
+            # Получаем состав пользователя
+            my_squad = game_data['squad']
+            selected_players = game_data.get('selected_players', [])
+
+            # Если выбрано меньше 11 игроков, добавляем случайных
+            if len(selected_players) < 11:
+                available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
+                needed = 11 - len(selected_players)
+                selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
+
+            my_lineup = []
+            for player_name in selected_players[:11]:
+                player_info = next((p for p in my_squad if p['name'] == player_name), None)
+                if player_info:
+                    my_lineup.append(player_info)
+
+            # Генерируем состав соперника
+            opponent_squad = []
+            if opponent_team in SQUADS_2007_08:
+                for player_data in SQUADS_2007_08[opponent_team]:
+                    if isinstance(player_data, tuple):
+                        player_name, rating = player_data
+                    else:
+                        player_name = player_data
+                        rating = 70
+                    opponent_squad.append({
+                        "name": player_name,
+                        "rating": rating
+                    })
+
+            opponent_squad_sorted = sorted(opponent_squad, key=lambda x: x['rating'], reverse=True)
+            opponent_lineup = opponent_squad_sorted[:11]
             # Обновление таймера
             minute = data.get('minute', 0)
             half = data.get('half', 1)
@@ -1226,6 +1214,8 @@ def match_action():
                     'minute': minute
                 })
                 match_data['xg_opponent'] = 0.0
+
+            return jsonify({"success": True, "match_data": match_data})
 
         elif action == 'start_second_half':
             match_data['half'] = 2
