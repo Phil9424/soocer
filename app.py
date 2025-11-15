@@ -1102,27 +1102,17 @@ def match():
 @app.route('/match_action', methods=['POST'])
 def match_action():
     try:
-        print(f"DEBUG: Session keys: {list(session.keys())}")  # DEBUG
-        print(f"DEBUG: game_data in session: {'game_data' in session}")  # DEBUG
-        print(f"DEBUG: match_data in session: {'match_data' in session}")  # DEBUG
-
         if 'game_data' not in session or 'match_data' not in session:
-            print(f"DEBUG: Missing session data, returning false")  # DEBUG
             return jsonify({"success": False})
 
         import random
-        print(f"DEBUG: request.json = {request.json}")  # DEBUG
         data = request.json
-        print(f"DEBUG: data = {data}")  # DEBUG
         action = data.get('action') if data else None
-        print(f"DEBUG: action = {action}")  # DEBUG
 
         if not data:
-            print(f"DEBUG: request.json is None")  # DEBUG
             return jsonify({"success": False, "error": "Invalid JSON"})
 
         if not action:
-            print(f"DEBUG: action is None or empty")  # DEBUG
             return jsonify({"success": False, "error": "No action provided"})
 
         match_data = session['match_data']
@@ -1166,7 +1156,6 @@ def match_action():
         opponent_lineup = opponent_squad_sorted[:11]
     
         if action == 'tick':
-            print(f"DEBUG: Processing 'tick' action")  # DEBUG
             # Обновление таймера
             minute = data.get('minute', 0)
             half = data.get('half', 1)
@@ -1221,13 +1210,11 @@ def match_action():
                 match_data['xg_opponent'] = 0.0
 
         elif action == 'start_second_half':
-            print(f"DEBUG: Processing 'start_second_half' action")  # DEBUG
             match_data['half'] = 2
             match_data['minute'] = 46
             return jsonify({"success": True, "match_data": match_data})
 
         elif action == 'end_match':
-            print(f"DEBUG: Processing 'end_match' action")  # DEBUG
             # Сохраняем результаты всего тура
             if 'match_results' not in session:
                 session['match_results'] = []
@@ -1380,14 +1367,12 @@ def match_action():
 
             session['match_data'] = match_data
             response_data = {"success": True, "match_data": match_data}
-            print(f"DEBUG: About to return response_data: {response_data}")  # DEBUG
             if is_season_end:
                 response_data["season_end"] = True
                 response_data["season_end_data"] = session['season_end_data']
             return jsonify(response_data)
 
         else:
-            print(f"DEBUG: Unknown action '{action}'")  # DEBUG
             # Неизвестное действие
             return jsonify({"success": False, "error": f"Unknown action: {action}"})
 
