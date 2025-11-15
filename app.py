@@ -1366,10 +1366,6 @@ def match_action():
                 response_data["season_end_data"] = session['season_end_data']
             return jsonify(response_data)
 
-        else:
-            # Неизвестное действие
-            return jsonify({"success": False, "error": f"Unknown action: {action}"})
-
     except Exception as e:
         print(f"Error in match_action: {e}")
         import traceback
