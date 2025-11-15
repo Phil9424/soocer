@@ -1688,22 +1688,22 @@ body::before {
 
 /* Стили для логотипов команд */
 .team-logo-small {
-    width: 12px !important;
-    height: 12px !important;
+    width: 8px !important;
+    height: 8px !important;
     object-fit: contain !important;
-    margin-bottom: 0.1rem !important;
+    margin-bottom: 0.05rem !important;
 }
 
 .team-logo-placeholder {
-    width: 12px !important;
-    height: 12px !important;
+    width: 8px !important;
+    height: 8px !important;
     border-radius: 50% !important;
     background: var(--light-blue) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 0.6rem !important;
-    margin-bottom: 0.1rem !important;
+    font-size: 0.4rem !important;
+    margin-bottom: 0.05rem !important;
 }
 
 .team-info-with-logo {
