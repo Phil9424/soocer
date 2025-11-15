@@ -1216,154 +1216,154 @@ def match_action():
             round_results = []
 
             # Добавляем результат нашего матча
-        my_result = {
-            'home_team': match_data['my_team'],
-            'away_team': match_data['opponent_team'],
-            'home_score': match_data['my_score'],
-            'away_score': match_data['opponent_score'],
-            'goals': match_data['goals'],
-            'is_user_match': True
-        }
-        round_results.append(my_result)
-
-        # Генерируем результаты остальных матчей тура
-        active_schedule = session.get('custom_schedule', MATCH_SCHEDULE)
-        if current_round <= len(active_schedule):
-            round_matches = active_schedule[current_round - 1]
-            for home, away in round_matches:
-                # Пропускаем наш матч, он уже добавлен
-                if (home == match_data['my_team'] and away == match_data['opponent_team']) or \
-                   (away == match_data['my_team'] and home == match_data['opponent_team']):
-                    continue
-
-                # Генерируем более реалистичный результат на основе рейтингов команд
-                home_rating = get_team_average_rating(home)
-                away_rating = get_team_average_rating(away)
-
-                # Вероятность победы зависит от разницы рейтингов
-                rating_diff = home_rating - away_rating
-                home_win_prob = 0.5 + (rating_diff / 20)  # Максимум ±0.25 от 0.5
-                home_win_prob = max(0.2, min(0.8, home_win_prob))
-
-                if random.random() < home_win_prob:
-                    # Выигрывает хозяин
-                    home_score = random.randint(1, 3)
-                    away_score = random.randint(0, home_score - 1)
-                else:
-                    # Выигрывает гость или ничья
-                    if random.random() < 0.6:  # 60% шанс на победу гостя
-                        away_score = random.randint(1, 3)
-                        home_score = random.randint(0, away_score - 1)
-                    else:  # Ничья
-                        home_score = random.randint(0, 2)
-                        away_score = random.randint(max(0, home_score - 1), home_score + 1)
-
-                # Генерируем бомбардиров для матча
-                goals = []
-                home_goals_left = home_score
-                away_goals_left = away_score
-
-                # Получаем составы команд для генерации бомбардиров
-                home_squad = []
-                away_squad = []
-                if home in SQUADS_2007_08:
-                    for player_data in SQUADS_2007_08[home]:
-                        if isinstance(player_data, tuple):
-                            home_squad.append({"name": player_data[0], "rating": player_data[1]})
-                        else:
-                            home_squad.append({"name": player_data, "rating": 70})
-                if away in SQUADS_2007_08:
-                    for player_data in SQUADS_2007_08[away]:
-                        if isinstance(player_data, tuple):
-                            away_squad.append({"name": player_data[0], "rating": player_data[1]})
-                        else:
-                            away_squad.append({"name": player_data, "rating": 70})
-
-                # Генерируем голы для домашней команды
-                for _ in range(home_goals_left):
-                    if home_squad:
-                        scorer = select_goal_scorer({"team_name": home}, home_squad)
-                        goals.append({
-                            'team': home,
-                            'scorer': scorer,
-                            'minute': random.randint(1, 90)
-                        })
-
-                # Генерируем голы для гостевой команды
-                for _ in range(away_goals_left):
-                    if away_squad:
-                        scorer = select_opponent_goal_scorer(away, away_squad)
-                        goals.append({
-                            'team': away,
-                            'scorer': scorer,
-                            'minute': random.randint(1, 90)
-                        })
-
-                round_results.append({
-                    'home_team': home,
-                    'away_team': away,
-                    'home_score': home_score,
-                    'away_score': away_score,
-                    'goals': goals,
-                    'is_user_match': False
-                })
-
-        session['match_results'] = round_results
-
-        # Обновляем турнирную таблицу
-        update_league_table(round_results)
-
-        # Увеличиваем тур для следующего матча
-        new_round = current_round + 1
-        session['current_round'] = new_round
-        game_data['current_round'] = new_round
-
-        # Определяем следующего соперника для нового тура
-        active_schedule = session.get('custom_schedule', MATCH_SCHEDULE)
-        next_opponent = None
-        next_is_home_match = True
-        if new_round <= len(active_schedule):
-            round_matches = active_schedule[new_round - 1]
-            my_team = game_data['team_name']
-            for home, away in round_matches:
-                if home == my_team:
-                    next_opponent = away
-                    next_is_home_match = True
-                    break
-                elif away == my_team:
-                    next_opponent = home
-                    next_is_home_match = False
-                    break
-
-        # Если матчи закончились, следующий соперник будет определен при сбросе сезона
-        if next_opponent:
-            game_data['next_opponent'] = next_opponent
-            game_data['is_home_match'] = next_is_home_match
-
-        # Проверяем, был ли это последний тур чемпионата
-        is_season_end = (new_round > 38)
-
-        # Очищаем данные матча
-        session.pop('match_data', None)
-
-        # Если это был последний тур, получаем итоговую позицию команды
-        if is_season_end:
-            final_position = None
-            for team in game_data['table']:
-                if team['team'] == game_data['team_name']:
-                    final_position = team['position']
-                    break
-            session['season_end_data'] = {
-                'final_position': final_position,
-                'team_name': game_data['team_name']
+            my_result = {
+                'home_team': match_data['my_team'],
+                'away_team': match_data['opponent_team'],
+                'home_score': match_data['my_score'],
+                'away_score': match_data['opponent_score'],
+                'goals': match_data['goals'],
+                'is_user_match': True
             }
-    
-        session['match_data'] = match_data
-        response_data = {"success": True, "match_data": match_data}
-        if is_season_end:
-            response_data["season_end"] = True
-            response_data["season_end_data"] = session['season_end_data']
-        return jsonify(response_data)
+            round_results.append(my_result)
+
+            # Генерируем результаты остальных матчей тура
+            active_schedule = session.get('custom_schedule', MATCH_SCHEDULE)
+            if current_round <= len(active_schedule):
+                round_matches = active_schedule[current_round - 1]
+                for home, away in round_matches:
+                    # Пропускаем наш матч, он уже добавлен
+                    if (home == match_data['my_team'] and away == match_data['opponent_team']) or \
+                       (away == match_data['my_team'] and home == match_data['opponent_team']):
+                        continue
+
+                    # Генерируем более реалистичный результат на основе рейтингов команд
+                    home_rating = get_team_average_rating(home)
+                    away_rating = get_team_average_rating(away)
+
+                    # Вероятность победы зависит от разницы рейтингов
+                    rating_diff = home_rating - away_rating
+                    home_win_prob = 0.5 + (rating_diff / 20)  # Максимум ±0.25 от 0.5
+                    home_win_prob = max(0.2, min(0.8, home_win_prob))
+
+                    if random.random() < home_win_prob:
+                        # Выигрывает хозяин
+                        home_score = random.randint(1, 3)
+                        away_score = random.randint(0, home_score - 1)
+                    else:
+                        # Выигрывает гость или ничья
+                        if random.random() < 0.6:  # 60% шанс на победу гостя
+                            away_score = random.randint(1, 3)
+                            home_score = random.randint(0, away_score - 1)
+                        else:  # Ничья
+                            home_score = random.randint(0, 2)
+                            away_score = random.randint(max(0, home_score - 1), home_score + 1)
+
+                    # Генерируем бомбардиров для матча
+                    goals = []
+                    home_goals_left = home_score
+                    away_goals_left = away_score
+
+                    # Получаем составы команд для генерации бомбардиров
+                    home_squad = []
+                    away_squad = []
+                    if home in SQUADS_2007_08:
+                        for player_data in SQUADS_2007_08[home]:
+                            if isinstance(player_data, tuple):
+                                home_squad.append({"name": player_data[0], "rating": player_data[1]})
+                            else:
+                                home_squad.append({"name": player_data, "rating": 70})
+                    if away in SQUADS_2007_08:
+                        for player_data in SQUADS_2007_08[away]:
+                            if isinstance(player_data, tuple):
+                                away_squad.append({"name": player_data[0], "rating": player_data[1]})
+                            else:
+                                away_squad.append({"name": player_data, "rating": 70})
+
+                    # Генерируем голы для домашней команды
+                    for _ in range(home_goals_left):
+                        if home_squad:
+                            scorer = select_goal_scorer({"team_name": home}, home_squad)
+                            goals.append({
+                                'team': home,
+                                'scorer': scorer,
+                                'minute': random.randint(1, 90)
+                            })
+
+                    # Генерируем голы для гостевой команды
+                    for _ in range(away_goals_left):
+                        if away_squad:
+                            scorer = select_opponent_goal_scorer(away, away_squad)
+                            goals.append({
+                                'team': away,
+                                'scorer': scorer,
+                                'minute': random.randint(1, 90)
+                            })
+
+                    round_results.append({
+                        'home_team': home,
+                        'away_team': away,
+                        'home_score': home_score,
+                        'away_score': away_score,
+                        'goals': goals,
+                        'is_user_match': False
+                    })
+
+            session['match_results'] = round_results
+
+            # Обновляем турнирную таблицу
+            update_league_table(round_results)
+
+            # Увеличиваем тур для следующего матча
+            new_round = current_round + 1
+            session['current_round'] = new_round
+            game_data['current_round'] = new_round
+
+            # Определяем следующего соперника для нового тура
+            active_schedule = session.get('custom_schedule', MATCH_SCHEDULE)
+            next_opponent = None
+            next_is_home_match = True
+            if new_round <= len(active_schedule):
+                round_matches = active_schedule[new_round - 1]
+                my_team = game_data['team_name']
+                for home, away in round_matches:
+                    if home == my_team:
+                        next_opponent = away
+                        next_is_home_match = True
+                        break
+                    elif away == my_team:
+                        next_opponent = home
+                        next_is_home_match = False
+                        break
+
+            # Если матчи закончились, следующий соперник будет определен при сбросе сезона
+            if next_opponent:
+                game_data['next_opponent'] = next_opponent
+                game_data['is_home_match'] = next_is_home_match
+
+            # Проверяем, был ли это последний тур чемпионата
+            is_season_end = (new_round > 38)
+
+            # Очищаем данные матча
+            session.pop('match_data', None)
+
+            # Если это был последний тур, получаем итоговую позицию команды
+            if is_season_end:
+                final_position = None
+                for team in game_data['table']:
+                    if team['team'] == game_data['team_name']:
+                        final_position = team['position']
+                        break
+                session['season_end_data'] = {
+                    'final_position': final_position,
+                    'team_name': game_data['team_name']
+                }
+
+            session['match_data'] = match_data
+            response_data = {"success": True, "match_data": match_data}
+            if is_season_end:
+                response_data["season_end"] = True
+                response_data["season_end_data"] = session['season_end_data']
+            return jsonify(response_data)
     except Exception as e:
         print(f"Error in match_action: {e}")
         import traceback
