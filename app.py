@@ -1804,6 +1804,9 @@ def match_action():
             # Проверяем, был ли это последний тур чемпионата
             is_season_end = (new_round > 38)
 
+            # Сохраняем обновленный game_data в сессию
+            session['game_data'] = game_data
+
             # Очищаем данные матча
             session.pop('match_data', None)
 
@@ -1819,8 +1822,7 @@ def match_action():
                     'team_name': game_data['team_name']
                 }
 
-            session['match_data'] = match_data
-            response_data = {"success": True, "match_data": match_data}
+            response_data = {"success": True, "match_data": {}, "new_round": new_round, "season_end": is_season_end}
             if is_season_end:
                 response_data["season_end"] = True
                 response_data["season_end_data"] = session['season_end_data']

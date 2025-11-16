@@ -164,7 +164,7 @@ if (currentHalf === 1) {
         }
     }
 } else if (currentHalf === 2) {
-    if (currentMinute >= 92) {
+    if (currentMinute >= 87) {
         isRunning = false;
         if (addedTimeEl && currentMinute > 90) {
             addedTimeEl.textContent = '+' + (currentMinute - 90);
@@ -469,10 +469,10 @@ function startSecondHalf() {
                 addedTimeEl.style.display = 'none';
             }
             
-            // Обновляем кнопку
+            // Обновляем кнопки
             const controls = document.querySelector('.match-controls');
             if (controls) {
-                controls.innerHTML = '<button class="btn btn-secondary" onclick="showSubstitutions()">🔄 Замены</button>';
+                controls.innerHTML = '<button class="btn btn-secondary" onclick="showSubstitutions()">🔄 Замены</button><button class="btn btn-primary" onclick="showTactics()">⚽ Тактика</button>';
             }
             
             // Запускаем таймер снова
