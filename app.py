@@ -703,27 +703,40 @@ def about():
 
 @app.route('/save_game', methods=['POST'])
 def save_game():
+    # Проверяем, работаем ли мы на Vercel
+    is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
+
+    if is_vercel:
+        return jsonify({"success": False, "message": "Сохранение недоступно на Vercel. Используйте браузерное сохранение."})
+
     if 'game_data' not in session:
         return jsonify({"success": False, "message": "Нет данных для сохранения"})
-    
+
     save_dir = 'saves'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{save_dir}/save_{timestamp}.json"
-    
+
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(session['game_data'], f, ensure_ascii=False, indent=2)
-    
+
     return jsonify({"success": True, "message": "Игра сохранена!"})
 
 @app.route('/load_game')
 def load_game():
+    # Проверяем, работаем ли мы на Vercel
+    is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
+
+    if is_vercel:
+        # На Vercel показываем сообщение о том, что сохранение недоступно
+        return render_template('load_game.html', saves=[], is_vercel=True)
+
     save_dir = 'saves'
     if not os.path.exists(save_dir):
         return render_template('load_game.html', saves=[])
-    
+
     saves = []
     for filename in os.listdir(save_dir):
         if filename.endswith('.json'):

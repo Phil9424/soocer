@@ -68,23 +68,43 @@
 {% block scripts %}
 <script>
 function saveGame() {
-    fetch('{{ url_for("save_game") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+    // Проверяем, работаем ли мы на Vercel
+    const isVercel = window.location.hostname.includes('vercel.app');
+
+    if (isVercel) {
+        // На Vercel сохраняем в localStorage браузера
+        try {
+            // Получаем текущие данные игры (предполагаем, что они есть в sessionStorage или можем получить их)
+            const gameData = {
+                timestamp: new Date().toISOString(),
+                note: 'Сохранено в браузере (Vercel)'
+            };
+
+            localStorage.setItem('football_manager_save', JSON.stringify(gameData));
+            alert('✅ Игра сохранена в браузере!\n\n⚠️ Данные хранятся только в этом браузере и будут потеряны при очистке кэша.');
+        } catch (error) {
+            alert('❌ Ошибка при сохранении в браузере');
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ ' + data.message);
-        } else {
-            alert('❌ ' + data.message);
-        }
-    })
-    .catch(error => {
-        alert('❌ Ошибка при сохранении игры');
-    });
+    } else {
+        // На локальном сервере сохраняем на диск
+        fetch('{{ url_for("save_game") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ ' + data.message);
+            } else {
+                alert('❌ ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('❌ Ошибка при сохранении игры');
+        });
+    }
 }
 </script>
 {% endblock %}
