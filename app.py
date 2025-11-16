@@ -431,7 +431,7 @@ SQUADS_2007_08 = {
         ("Petr Cech", 88), ("Carlo Cudicini", 80), ("John Terry", 88), ("Ricardo Carvalho", 85), ("Ashley Cole", 85),
         ("Paulo Ferreira", 79), ("Wayne Bridge", 78), ("Michael Essien", 86), ("Frank Lampard", 87), ("Claude Makelele", 84),
         ("Michael Ballack", 86), ("Joe Cole", 83), ("Shaun Wright-Phillips", 78), ("Florent Malouda", 82), ("Didier Drogba", 88),
-        ("Nicolas Anelka", 82), ("Salomon Kalou", 78), ("Andriy Shevchenko", 82), ("John Obi Mikel", 78), ("Alex", 80),
+        ("Salomon Kalou", 78), ("Andriy Shevchenko", 82), ("John Obi Mikel", 78), ("Alex", 80), ("Hernan Crespo", 82),
         ("Juliano Belletti", 78), ("Branislav Ivanovic", 77), ("Scott Sinclair", 68), ("Steve Sidwell", 75)
     ],
     "Derby County": [
@@ -494,8 +494,8 @@ SQUADS_2007_08 = {
     "Portsmouth": [
         ("David James", 80), ("Jamie Ashdown", 69), ("Sol Campbell", 82), ("Sylvain Distin", 79), ("Glen Johnson", 78),
         ("Hermann Hreidarsson", 75), ("Noe Pamarot", 73), ("Lassana Diarra", 81), ("Sulley Muntari", 79), ("Papa Bouba Diop", 77),
-        ("Niko Kranjcar", 80), ("John Utaka", 77), ("Benjani", 76), ("Jermain Defoe", 81), ("Peter Crouch", 78),
-        ("Nwankwo Kanu", 76), ("David Nugent", 73), ("Sean Davis", 75), ("Richard Hughes", 74), ("Pedro Mendes", 76),
+        ("Niko Kranjcar", 80), ("John Utaka", 77), ("Benjani", 76), ("Jermain Defoe", 81), ("Dave Nugent", 73),
+        ("Nwankwo Kanu", 76), ("Matthew Taylor", 75), ("Sean Davis", 75), ("Richard Hughes", 74), ("Pedro Mendes", 76),
         ("Glen Little", 72), ("Djimi Traore", 73), ("Lauren", 75)
     ],
     "Reading": [
@@ -516,8 +516,8 @@ SQUADS_2007_08 = {
         ("Paul Robinson", 80), ("Radek Cerny", 72), ("Ledley King", 82), ("Michael Dawson", 78), ("Younes Kaboul", 75),
         ("Gareth Bale", 72), ("Pascal Chimbonda", 78), ("Alan Hutton", 75), ("Jermaine Jenas", 79), ("Tom Huddlestone", 76),
         ("Didier Zokora", 77), ("Aaron Lennon", 80), ("Steed Malbranque", 78), ("Robbie Keane", 82), ("Dimitar Berbatov", 85),
-        ("Darren Bent", 79), ("Jermain Defoe", 81), ("Teemu Tainio", 74), ("Jamie O'Hara", 72), ("Adel Taarabt", 70),
-        ("Giovani dos Santos", 75), ("Heurelho Gomes", 78)
+        ("Darren Bent", 79), ("Adel Taarabt", 70), ("Teemu Tainio", 74), ("Jamie O'Hara", 72), ("Giovani dos Santos", 75),
+        ("Heurelho Gomes", 78)
     ],
     "West Ham United": [
         ("Robert Green", 79), ("Richard Wright", 73), ("Anton Ferdinand", 76), ("Matthew Upson", 78), ("Lucas Neill", 77),
