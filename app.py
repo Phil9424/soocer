@@ -1502,6 +1502,9 @@ def match():
         else:
             position = '-'
 
+        if opponent_team == 'Tottenham Hotspur' and player['name'] == 'Heurelho Gomes':
+            print(f"DEBUG Gomes display position: index {i} -> {position}")
+
         opponent_lineup.append({**player, 'position': position})
     
     # Всегда создаем новые данные матча при заходе на страницу матча
