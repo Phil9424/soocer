@@ -1485,7 +1485,32 @@ def match_action():
                     })
 
             opponent_squad_sorted = sort_squad_by_positions(opponent_squad, opponent_team)
-            opponent_lineup = opponent_squad_sorted[:11]
+
+            # Формируем правильный состав матча: 1 GK, 4 DEF, 4 MID, 2 FWD
+            opponent_lineup = []
+            gk_taken = 0
+            def_taken = 0
+            mid_taken = 0
+            fwd_taken = 0
+
+            for player in opponent_squad_sorted:
+                if len(opponent_lineup) >= 11:
+                    break
+
+                # Определяем позицию по порядку в отсортированном списке
+                total_players = len(opponent_lineup)
+                if total_players == 0 and gk_taken < 1:  # Первый игрок - вратарь
+                    opponent_lineup.append(player)
+                    gk_taken += 1
+                elif total_players >= 1 and total_players <= 4 and def_taken < 4:  # Следующие 4 - защитники
+                    opponent_lineup.append(player)
+                    def_taken += 1
+                elif total_players >= 5 and total_players <= 8 and mid_taken < 4:  # Следующие 4 - полузащитники
+                    opponent_lineup.append(player)
+                    mid_taken += 1
+                elif total_players >= 9 and total_players <= 10 and fwd_taken < 2:  # Последние 2 - нападающие
+                    opponent_lineup.append(player)
+                    fwd_taken += 1
             # Обновление таймера
             minute = data.get('minute', 0)
             half = data.get('half', 1)
