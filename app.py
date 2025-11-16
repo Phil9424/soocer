@@ -1712,6 +1712,14 @@ def match_action():
                         })
 
                     # Добавляем результат матча
+                    round_results.append({
+                        'home_team': home,
+                        'away_team': away,
+                        'home_score': home_score,
+                        'away_score': away_score,
+                        'goals': goals,
+                        'is_user_match': False
+                    })
             # Сохраняем результаты текущего тура отдельно для таблицы итогов
             session['last_round_results'] = round_results
 
