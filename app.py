@@ -19,64 +19,162 @@ def get_player_position(team_name, player_index):
         player_data = squad[player_index]
         player_name = player_data[0] if isinstance(player_data, tuple) else player_data
 
-        # Известные вратари
+        # Известные вратари (Только GK)
         goalkeepers = [
             "Manuel Almunia", "Jens Lehmann", "Scott Carson", "Stuart Taylor", "Maik Taylor", "Colin Doyle",
             "Petr Cech", "Carlo Cudicini", "Paul Robinson", "Chris Kirkland", "Brad Friedel", "Thomas Sorensen",
-            "Jussi Jaaskelainen", "Ali Al Habsi", "Mark Schwarzer", "Robert Green", "Roy Carroll", "Chris Kirkland",
+            "Jussi Jaaskelainen", "Ali Al Habsi", "Mark Schwarzer", "Robert Green", "Roy Carroll",
             "Marton Fulop", "Boaz Myhill", "Luke Steele", "Heurelho Gomes", "Craig Gordon", "David James",
-            "Shay Given", "Steve Harper", "Robbie Keane", "Joe Hart", "Ben Foster", "Wayne Hennessey"
+            "Shay Given", "Steve Harper", "Joe Hart", "Ben Foster", "Wayne Hennessey"
         ]
 
-        # Известные защитники
+        # Известные защитники (Только DEF)
         defenders = [
+            # Arsenal
             "Gael Clichy", "Kolo Toure", "William Gallas", "Philippe Senderos", "Bacary Sagna", "Emmanuel Eboue",
+            # Aston Villa
             "Olof Mellberg", "Martin Laursen", "Zat Knight", "Curtis Davies", "Wilfred Bouma", "Nicky Shorey",
+            # Birmingham
             "Stephen Kelly", "Liam Ridgewell", "Radhi Jaidi", "Martin Taylor", "Franck Queudrue", "Stuart Parnaby",
+            # Blackburn
+            "Andre Ooijer", "Christopher Samba", "Brett Emerton", "Stephen Warnock", "Ryan Nelsen", "Lucas Neill",
+            # Bolton
+            "Jlloyd Samuel", "Abdoulaye Meite", "Gricel Ndo", "Kevin Nolan", "Ivan Campo", "Abdoulaye Faye",
+            # Chelsea
+            "John Terry", "Paulo Ferreira", "Ashley Cole", "Wayne Bridge", "Juliano Belletti", "Ricardo Carvalho",
+            # Derby
+            "Darren Moore", "Claude Davis", "Dean Leacock", "Andy Todd", "Marc Edworthy", "Tyrone Mears",
+            # Everton
+            "Joseph Yobo", "Alan Stubbs", "David Weir", "Leighton Baines", "Joleon Lescott", "Tony Hibbert",
+            # Fulham
+            "Ian Pearce", "Brede Hangeland", "Paul Konchesky", "Carlos Bocanegra", "Dejan Stefanovic", "Liam Rosenior",
+            # Liverpool
+            "Jamie Carragher", "Daniel Agger", "Alvaro Arbeloa", "John Arne Riise", "Steve Finnan", "Fabio Aurelio",
+            # Man City
+            "Richard Dunne", "Sylvain Distin", "Michael Ball", "Javier Garrido", "Vedran Corluka", "Michael Johnson",
+            # Man Utd
             "Rio Ferdinand", "Nemanja Vidic", "Patrice Evra", "Gary Neville", "Mikael Silvestre", "Wes Brown",
-            "John Terry", "Frank Lampard", "Paulo Ferreira", "Ashley Cole", "Claude Makelele", "Damien Duff",
-            "Joe Cole", "Didier Drogba", "Nicolas Anelka", "Andriy Shevchenko", "Michael Essien", "Salomon Kalou",
-            "Wayne Bridge", "Juliano Belletti", "Geremi", "Shaun Wright-Phillips", "Steve Sidwell", "Michael Ballack",
-            "Florent Malouda", "Robbie Keane", "Jermaine Jenas", "Michael Carrick", "Owen Hargreaves", "Anderson",
-            "Cristiano Ronaldo", "Wayne Rooney", "Carlos Tevez", "Louis Saha", "Nani", "Ryan Giggs", "Paul Scholes",
-            "Ji-sung Park", "Darren Fletcher", "Michael Carrick", "John O'Shea", "Wes Brown", "Rafael", "Fabio",
-            "Titus Bramble", "Kevin Nolan", "Emile Heskey", "Matthew Taylor", "Paul Konchesky", "Hayden Mullins",
-            "Zoltan Gera", "Matthew Etherington", "Jimmy Floyd Hasselbaink", "Dave Kitson", "Marlon King",
-            "Kevin Davies", "Joleon Lescott", "Nicky Hunt", "Kevin Kilbane", "Julien Faubert", "Paul Stalteri",
-            "Hayden Foxe", "Chris Baird", "David Dunn", "Brett Emerton", "Andy Todd", "Kenny Cunningham",
-            "Damien Francis", "Marlon Harewood", "Neil Kilkenny", "Julian Gray", "Rowan Vine", "Darren Huckerby",
-            "David Bentley", "Dean Ashton", "Shola Ameobi", "Antoine Sibierski", "Emmanuel Adebayor", "Robin van Persie",
-            "Theo Walcott", "Cesc Fabregas", "Gilberto Silva", "Tomas Rosicky", "Alexander Hleb", "Mathieu Flamini",
-            "Denilson", "Abou Diaby", "Alexandre Song", "Justin Hoyte", "Armand Traore", "Lukasz Fabianski",
-            "Gareth Barry", "Nigel Reo-Coker", "Stiliyan Petrov", "Ashley Young", "Shaun Maloney", "Gabriel Agbonlahor",
-            "John Carew", "Luke Moore", "Craig Gardner", "Isaiah Osbourne", "Patrik Berger", "Moustapha Salifou",
-            "Wayne Routledge", "Nathan Delfouneso"
+            "John O'Shea", "Gerard Pique", "Rafael", "Fabio",
+            # Middlesbrough
+            "David Wheater", "Robert Huth", "Emanuel Pogatetz", "Jonathan Woodgate", "Luke Young", "Andrew Taylor",
+            # Newcastle
+            "Steve Harper", "Titus Bramble", "Emile Heskey", "Matthew Taylor", "Paul Stalteri", "Hayden Foxe",
+            # Portsmouth
+            "Sol Campbell", "Sylvain Distin", "Glen Johnson", "Hermann Hreidarsson", "Noe Pamarot", "Lassana Diarra",
+            # Reading
+            "Ibrahima Sonko", "Michael Duberry", "Nick Shorey", "Graeme Murty", "Liam Rosenior", "James Harper",
+            # Sunderland
+            "Paul McShane", "Danny Collins", "Dean Whitehead", "Ian Harte", "Nyron Nosworthy", "Anthony Stokes",
+            # Tottenham
+            "Ledley King", "Michael Dawson", "Younes Kaboul", "Gareth Bale", "Pascal Chimbonda", "Alan Hutton",
+            # West Ham
+            "Anton Ferdinand", "Matthew Upson", "Lucas Neill", "George McCartney", "Jonathan Spector", "Mark Noble",
+            # Wigan
+            "Emile Heskey", "Titus Bramble", "Kevin Kilbane", "Paul Stalteri", "Maynor Figueroa", "Leighton Baines"
         ]
 
-        # Известные нападающие
+        # Известные полузащитники (Только MID)
+        midfielders = [
+            # Arsenal
+            "Cesc Fabregas", "Gilberto Silva", "Tomas Rosicky", "Alexander Hleb", "Mathieu Flamini", "Denilson",
+            "Theo Walcott", "Abou Diaby", "Alexandre Song", "Justin Hoyte", "Armand Traore", "Lukasz Fabianski",
+            # Aston Villa
+            "Gareth Barry", "Nigel Reo-Coker", "Stiliyan Petrov", "Ashley Young", "Shaun Maloney", "Gabriel Agbonlahor",
+            # Birmingham
+            "Mehdi Nafti", "Fabrice Muamba", "Damien Johnson", "Sebastian Larsson", "Gary McSheffrey", "Olivier Kapo",
+            # Blackburn
+            "David Bentley", "Brett Emerton", "David Dunn", "Steven Reid", "Tugay Kerimoglu", "Paul Gallagher",
+            # Bolton
+            "Kevin Davies", "Ivan Campo", "Stelios Giannakopoulos", "Gary Speed", "Ricardo Gardner", "El Hadji Diouf",
+            # Chelsea
+            "Michael Essien", "Frank Lampard", "Claude Makelele", "Damien Duff", "Joe Cole", "Geremi",
+            "Shaun Wright-Phillips", "Steve Sidwell", "Michael Ballack", "Florent Malouda", "John Obi Mikel",
+            # Derby
+            "Matt Oakley", "Gary Teale", "Stephen Pearson", "Paul Thirlwell", "Michael Johnson", "Craig Fagan",
+            # Everton
+            "Miklos Feher", "Tim Cahill", "Phil Neville", "Leon Osman", "Kevin Kilbane", "Simon Davies",
+            # Fulham
+            "Michael Brown", "Steed Malbranque", "Jimmy Bullard", "Claus Jensen", "Brian McBride", "Collins John",
+            # Liverpool
+            "Steven Gerrard", "Xabi Alonso", "Javier Mascherano", "Lucas Leiva", "Yossi Benayoun", "Ryan Babel",
+            # Man City
+            "Stephen Ireland", "Elano", "Martin Petrov", "Darius Vassell", "Dietmar Hamann", "Gelson Fernandes",
+            # Man Utd
+            "Michael Carrick", "Paul Scholes", "Owen Hargreaves", "Anderson", "Ryan Giggs", "Ji-sung Park",
+            "Darren Fletcher", "Nani",
+            # Middlesbrough
+            "Stewart Downing", "Gary O'Neil", "Fabio Rochemback", "George Boateng", "Julio Arca", "Tuncay Sanli",
+            # Newcastle
+            "Kevin Nolan", "James Milner", "Charles N'Zogbia", "Nicky Butt", "Matthew Etherington", "Alan Smith",
+            # Portsmouth
+            "Papa Bouba Diop", "Sulley Muntari", "Niko Kranjcar", "John Utaka", "Pedro Mendes", "Richard Hughes",
+            # Reading
+            "Bobby Convey", "Stephen Hunt", "James Harper", "Leroy Lita", "John Oster", "Kevin Doyle",
+            # Sunderland
+            "Ross Wallace", "Grant Leadbitter", "Kenwyne Jones", "Carlos Edwards", "Andy Reid", "Rade Prica",
+            # Tottenham
+            "Jermaine Jenas", "Tom Huddlestone", "Didier Zokora", "Aaron Lennon", "Steed Malbranque", "Jamie O'Hara",
+            # West Ham
+            "Scott Parker", "Hayden Mullins", "Freddie Ljungberg", "Matthew Etherington", "Craig Bellamy", "Nolberto Solano",
+            # Wigan
+            "Paul Scharner", "Kevin Kilbane", "Jason Koumas", "Antonio Valencia", "Michael Brown", "David Cotterill"
+        ]
+
+        # Известные нападающие (Только FWD)
         forwards = [
-            "Robin van Persie", "Emmanuel Adebayor", "Nicklas Bendtner", "Eduardo", "John Carew", "Marlon Harewood",
-            "Luke Moore", "Gabriel Agbonlahor", "Cameron Jerome", "Mikael Forssell", "James McFadden", "Garry O'Connor",
-            "Daniel de Ridder", "Olivier Kapo", "Rafael Schmitz", "Didier Drogba", "Nicolas Anelka", "Andriy Shevchenko",
-            "Salomon Kalou", "Wayne Rooney", "Carlos Tevez", "Louis Saha", "Cristiano Ronaldo", "Ji-sung Park",
-            "Alan Smith", "Ole Gunnar Solskjaer", "Dimitar Berbatov", "Michael Owen", "Peter Crouch", "Craig Bellamy",
-            "Robbie Keane", "Jermaine Defoe", "Mido", "Teemu Tainio", "Niko Kranjcar", "Matthew Taylor", "Dave Kitson",
-            "Marlon King", "Kevin Davies", "Matthew Taylor", "Zoltan Gera", "Jimmy Floyd Hasselbaink", "Matthew Etherington",
-            "Dean Ashton", "Shola Ameobi", "Antoine Sibierski", "Kenny Miller", "Craig Bellamy", "John Hartson",
-            "Robbie Keane", "Jermaine Defoe", "Andy Johnson", "Dean Ashton", "Teddy Sheringham", "Marcus Bent",
-            "Brian McBride", "Darren Huckerby", "David Bentley", "Chris Sutton", "Kevin Phillips", "Stern John",
-            "Niall Quinn", "Dean Windass", "Rowan Vine", "Ian Moore", "Danny Webber", "Scott Dobie", "Steve Howard"
+            # Arsenal
+            "Robin van Persie", "Emmanuel Adebayor", "Nicklas Bendtner", "Eduardo",
+            # Aston Villa
+            "John Carew", "Luke Moore", "Gabriel Agbonlahor",
+            # Birmingham
+            "Cameron Jerome", "Mikael Forssell", "James McFadden", "Garry O'Connor", "Daniel de Ridder", "Rafael Schmitz",
+            # Blackburn
+            "Benni McCarthy", "Jason Roberts", "Matt Derbyshire", "Paul Dickov", "Francis Jeffers",
+            # Bolton
+            "Nicolas Anelka", "Kevin Davies", "Heidar Helguson", "Grzegorz Rasiak", "Nolberto Solano",
+            # Chelsea
+            "Didier Drogba", "Andriy Shevchenko", "Salomon Kalou",
+            # Derby
+            "Steve Howard", "Jon Stead", "Kenny Miller", "Gary Teale", "Artur Boruc",
+            # Everton
+            "Andrew Johnson", "James Vaughan", "Victor Anichebe", "James McFadden", "Yakubu Aiyegbeni",
+            # Fulham
+            "Brian McBride", "Heidar Helguson", "David Healy", "Collins John", "Diomansy Kamara",
+            # Liverpool
+            "Fernando Torres", "Peter Crouch", "Dirk Kuyt", "Craig Bellamy", "Andriy Voronin",
+            # Man City
+            "Valeri Bojinov", "Georgios Samaras", "Rolando Bianchi", "Felipe Caicedo", "Geovanni",
+            # Man Utd
+            "Cristiano Ronaldo", "Wayne Rooney", "Carlos Tevez", "Louis Saha", "Alan Smith", "Ole Gunnar Solskjaer",
+            # Middlesbrough
+            "Mark Viduka", "Afonso Alves", "Jeremie Aliadiere", "Dong-Gook Lee", "Tom Craddock",
+            # Newcastle
+            "Michael Owen", "Mark Viduka", "Alan Smith", "Shola Ameobi", "Obafemi Martins",
+            # Portsmouth
+            "Jermain Defoe", "Dave Nugent", "Benjani", "Nwankwo Kanu",
+            # Reading
+            "Shane Long", "Kevin Doyle", "Dave Kitson", "Leroy Lita",
+            # Sunderland
+            "Kenwyne Jones", "Daryl Murphy", "Grant Leadbitter", "Rade Prica", "Carlos Edwards",
+            # Tottenham
+            "Robbie Keane", "Dimitar Berbatov", "Darren Bent",
+            # West Ham
+            "Dean Ashton", "Carlton Cole", "Bobby Zamora",
+            # Wigan
+            "Emile Heskey", "Marcus Bent", "Henri Camara", "Julio Baptista"
         ]
 
         # Проверяем по имени
         if player_name in goalkeepers:
             return 'GK'
-        elif player_name in forwards:
-            return 'FWD'
         elif player_name in defenders:
             return 'DEF'
+        elif player_name in midfielders:
+            return 'MID'
+        elif player_name in forwards:
+            return 'FWD'
         else:
-            # Fallback на позицию по индексу
+            # Fallback на позицию по индексу для неизвестных игроков
             if player_index < 2:
                 return 'GK'
             elif player_index < 8:
