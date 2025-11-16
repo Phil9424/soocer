@@ -196,15 +196,11 @@ def sort_squad_by_positions(squad, team_name):
             print(f"WARNING: team {team_name} not in SQUADS_2007_08, returning unsorted squad")
             return squad
 
-        # Создаем словарь игрок -> оригинальный индекс
-        player_to_index = {}
+        # Создаем словарь имя игрока -> оригинальный индекс
+        name_to_index = {}
         for i, player_data in enumerate(SQUADS_2007_08[team_name]):
             player_name = player_data[0] if isinstance(player_data, tuple) else player_data
-            # Находим соответствующего игрока в squad
-            for squad_player in squad:
-                if squad_player['name'] == player_name:
-                    player_to_index[squad_player] = i
-                    break
+            name_to_index[player_name] = i
 
         # Разделяем игроков по позициям
         gk_players = []
@@ -213,7 +209,7 @@ def sort_squad_by_positions(squad, team_name):
         fwd_players = []
 
         for player in squad:
-            original_index = player_to_index.get(player, 0)
+            original_index = name_to_index.get(player['name'], 0)
             position = get_player_position(team_name, original_index)
             if position == 'GK':
                 gk_players.append(player)
@@ -226,7 +222,6 @@ def sort_squad_by_positions(squad, team_name):
 
         # Возвращаем отсортированный состав
         result = gk_players + def_players + mid_players + fwd_players
-        print(f"DEBUG sort_squad: {team_name} - GK:{len(gk_players)}, DEF:{len(def_players)}, MID:{len(mid_players)}, FWD:{len(fwd_players)}")
         return result
 
     except Exception as e:
