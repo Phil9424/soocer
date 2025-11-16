@@ -28,17 +28,7 @@
                         {% endif %}
                     <div class="player-item player-main" data-player-name="{{ player.name }}" data-position-index="{{ i }}">
                         <span class="player-position">{{ position }}</span>
-                        {% set real_position = 'В' %}
-                        {% if get_player_position(data.team_name, loop.index0) == 'GK' %}
-                            {% set real_position = 'В' %}
-                        {% elif get_player_position(data.team_name, loop.index0) == 'DEF' %}
-                            {% set real_position = 'З' %}
-                        {% elif get_player_position(data.team_name, loop.index0) == 'MID' %}
-                            {% set real_position = 'П' %}
-                        {% elif get_player_position(data.team_name, loop.index0) == 'FWD' %}
-                            {% set real_position = 'Н' %}
-                        {% endif %}
-                        <span class="player-real-position">({{ real_position }})</span>
+                        <span class="player-real-position">({{ player.real_position }})</span>
                         <span class="player-name">{{ player.name }}</span>
                         {% if player.get('injury') or player.get('cards') %}
                         <span class="player-status">
@@ -73,6 +63,7 @@
                 {% if player.name not in selected_players_list %}
                 <div class="player-item player-bench" data-player-name="{{ player.name }}">
                     <span class="player-position">-</span>
+                    <span class="player-real-position">({{ player.real_position }})</span>
                     <span class="player-name">{{ player.name }}</span>
                     {% if player.get('injury') or player.get('cards') %}
                     <span class="player-status">

@@ -913,7 +913,30 @@ def game_page(page):
     elif page == 2:
         return render_template('game_page2.html', data=game_data)
     elif page == 3:
-        return render_template('game_page3.html', data=game_data)
+        # Вычисляем реальные позиции для всех игроков в составе
+        squad_with_positions = []
+        for i, player in enumerate(game_data['squad']):
+            real_position = get_player_position(game_data['team_name'], i)
+            # Преобразуем в русские обозначения
+            if real_position == 'GK':
+                real_pos_display = 'В'
+            elif real_position == 'DEF':
+                real_pos_display = 'З'
+            elif real_position == 'MID':
+                real_pos_display = 'П'
+            elif real_position == 'FWD':
+                real_pos_display = 'Н'
+            else:
+                real_pos_display = 'В'  # fallback
+
+            player_copy = player.copy()
+            player_copy['real_position'] = real_pos_display
+            squad_with_positions.append(player_copy)
+
+        game_data_copy = game_data.copy()
+        game_data_copy['squad'] = squad_with_positions
+
+        return render_template('game_page3.html', data=game_data_copy)
     elif page == 4:
         return render_template('game_page4.html', data=game_data)
     elif page == 5:
