@@ -1491,7 +1491,7 @@ def match():
                 "rating": rating
             })
     
-    opponent_squad_sorted = sorted(opponent_squad, key=lambda x: x['rating'], reverse=True)
+    opponent_squad_sorted = sort_squad_by_positions(opponent_squad, opponent_team)
     opponent_lineup = opponent_squad_sorted[:11]
     
     # Всегда создаем новые данные матча при заходе на страницу матча
@@ -1605,7 +1605,7 @@ def match_action():
                         "rating": rating
                     })
 
-            opponent_squad_sorted = sorted(opponent_squad, key=lambda x: x['rating'], reverse=True)
+            opponent_squad_sorted = sort_squad_by_positions(opponent_squad, opponent_team)
             opponent_lineup = opponent_squad_sorted[:11]
             # Обновление таймера
             minute = data.get('minute', 0)
