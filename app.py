@@ -1519,8 +1519,8 @@ def match():
 
 @app.route('/match_action', methods=['POST'])
 def match_action():
-    # Расширяем try блок на всю функцию для перехвата всех исключений
-    try:
+        # Расширяем try блок на всю функцию для перехвата всех исключений
+        try:
             # Проверяем наличие необходимых данных в сессии
             if 'game_data' not in session or 'match_data' not in session:
                 return jsonify({"success": False, "error": "Session not initialized"})
@@ -1562,12 +1562,12 @@ def match_action():
                 for player_name in selected_players[:11]:
                     player_info = next((p for p in my_squad if p['name'] == player_name), None)
                     if player_info:
-                my_lineup.append(player_info)
+                        my_lineup.append(player_info)
 
-        # Генерируем состав соперника
-        opponent_squad = []
-        if opponent_team in SQUADS_2007_08:
-            for player_data in SQUADS_2007_08[opponent_team]:
+                # Генерируем состав соперника
+                opponent_squad = []
+                if opponent_team in SQUADS_2007_08:
+                    for player_data in SQUADS_2007_08[opponent_team]:
                 if isinstance(player_data, tuple):
                     player_name, rating = player_data
                 else:
