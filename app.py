@@ -9,7 +9,14 @@ app = Flask(__name__,
 app.secret_key = 'football_manager_secret_key_2024'
 
 # Простые данные для тестирования
-TEAMS = ['Arsenal', 'Chelsea', 'Manchester United', 'Liverpool', 'Manchester City']
+TEAMS_DATA = [
+    {'name': 'Arsenal', 'logo': '/static/logos/arsenal.png'},
+    {'name': 'Chelsea', 'logo': '/static/logos/chelsea.png'},
+    {'name': 'Manchester United', 'logo': '/static/logos/manchester_united.png'},
+    {'name': 'Liverpool', 'logo': '/static/logos/liverpool.png'},
+    {'name': 'Manchester City', 'logo': '/static/logos/manchester_city.png'}
+]
+TEAMS = [team['name'] for team in TEAMS_DATA]
 TEAM_LOGOS = {}
 TEAM_LOGOS_FALLBACK = {}
 
@@ -30,7 +37,7 @@ def index():
 
 @app.route('/new_game')
 def new_game():
-    return render_template('select_team.html', teams=TEAMS, preselected_team='')
+    return render_template('select_team.html', teams=TEAMS_DATA, preselected_team='')
 
 @app.route('/load_game')
 def load_game():
@@ -39,6 +46,23 @@ def load_game():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+@app.route('/start_game', methods=['POST'])
+def start_game():
+    team_name = request.form.get('team')
+    if not team_name or team_name not in TEAMS:
+        return redirect(url_for('new_game'))
+
+    # Создаем игровую сессию
+    session['game_data'] = {
+        'team_name': team_name,
+        'squad': [{'name': f'Player {i}', 'rating': 70} for i in range(20)],
+        'selected_players': [f'Player {i}' for i in range(11)],
+        'next_opponent': 'Chelsea' if team_name != 'Chelsea' else 'Arsenal',
+        'current_round': 1
+    }
+
+    return redirect(url_for('match'))
 
 @app.route('/match')
 def match():
