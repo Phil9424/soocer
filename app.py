@@ -1670,10 +1670,17 @@ def match_action():
             return jsonify({"success": True, "match_data": match_data})
 
         elif action == 'start_second_half':
-            match_data['half'] = 2
-            match_data['minute'] = 46
-            session['match_data'] = match_data
-            return jsonify({"success": True, "match_data": match_data})
+            try:
+                match_data['half'] = 2
+                match_data['minute'] = 46
+                session['match_data'] = match_data
+                print(f"DEBUG start_second_half: half={match_data['half']}, minute={match_data['minute']}")
+                return jsonify({"success": True, "match_data": match_data})
+            except Exception as e:
+                print(f"ERROR in start_second_half: {e}")
+                import traceback
+                traceback.print_exc()
+                return jsonify({"success": False, "error": f"Ошибка при начале второго тайма: {str(e)}"})
     
         elif action == 'end_match':
             # Сохраняем результаты всего тура

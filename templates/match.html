@@ -310,7 +310,14 @@ function updateStats(matchData) {
 function showStartSecondHalfButton() {
     const controls = document.querySelector('.match-controls');
     if (controls && !document.getElementById('start-second-half-btn')) {
-        controls.innerHTML = '<button class="btn btn-success" id="start-second-half-btn" onclick="startSecondHalf()" style="font-size: 1.2rem; padding: 1rem 2rem;">⏱️ Начать 2 тайм</button>';
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-success';
+        btn.id = 'start-second-half-btn';
+        btn.textContent = '⏱️ Начать 2 тайм';
+        btn.style.cssText = 'font-size: 1.2rem; padding: 1rem 2rem;';
+        btn.addEventListener('click', startSecondHalf);
+        controls.innerHTML = '';
+        controls.appendChild(btn);
     }
 }
 
@@ -452,9 +459,14 @@ function startSecondHalf() {
             action: 'start_second_half'
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
-        if (data.success && data.match_data) {
+        if (data.success) {
             // Обновляем переменные без перезагрузки страницы
             currentHalf = 2;
             currentMinute = 46;
@@ -478,7 +490,13 @@ function startSecondHalf() {
             // Запускаем таймер снова
             isRunning = true;
             timerInterval = setInterval(updateTimer, 333);
+        } else {
+            alert('❌ Ошибка: ' + (data.error || 'Неизвестная ошибка'));
         }
+    })
+    .catch(error => {
+        console.error('Ошибка при начале второго тайма:', error);
+        alert('❌ Ошибка сети при начале второго тайма: ' + error.message);
     });
 }
 
