@@ -703,26 +703,42 @@ def about():
 
 @app.route('/save_game', methods=['POST'])
 def save_game():
+    if 'game_data' not in session:
+        return jsonify({"success": False, "message": "Нет данных для сохранения"})
+
     # Проверяем, работаем ли мы на Vercel
     is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
 
     if is_vercel:
-        return jsonify({"success": False, "message": "Сохранение недоступно на Vercel. Используйте браузерное сохранение."})
+        # На Vercel сохраняем в сессии вместо файла
+        if 'saved_games' not in session:
+            session['saved_games'] = []
 
-    if 'game_data' not in session:
-        return jsonify({"success": False, "message": "Нет данных для сохранения"})
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        save_data = {
+            'timestamp': timestamp,
+            'game_data': session['game_data'],
+            'team_name': session['game_data'].get('team_name', 'Unknown')
+        }
 
-    save_dir = 'saves'
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+        # Сохраняем только последнее сохранение (из-за ограничений сессии)
+        session['saved_games'] = [save_data]
+        session.modified = True
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{save_dir}/save_{timestamp}.json"
+        return jsonify({"success": True, "message": "Игра сохранена в сессии! (Vercel)"})
+    else:
+        # На локальном сервере сохраняем на диск
+        save_dir = 'saves'
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
 
-    with open(filename, 'w', encoding='utf-8') as f:
-        json.dump(session['game_data'], f, ensure_ascii=False, indent=2)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{save_dir}/save_{timestamp}.json"
 
-    return jsonify({"success": True, "message": "Игра сохранена!"})
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(session['game_data'], f, ensure_ascii=False, indent=2)
+
+        return jsonify({"success": True, "message": "Игра сохранена!"})
 
 @app.route('/load_game')
 def load_game():
@@ -730,8 +746,17 @@ def load_game():
     is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
 
     if is_vercel:
-        # На Vercel показываем сообщение о том, что сохранение недоступно
-        return render_template('load_game.html', saves=[], is_vercel=True)
+        # На Vercel показываем сохраненные игры из сессии
+        saves = []
+        if 'saved_games' in session and session['saved_games']:
+            for save_data in session['saved_games']:
+                saves.append({
+                    'filename': f"session_{save_data['timestamp']}",
+                    'team': save_data.get('team_name', 'Unknown'),
+                    'timestamp': save_data['timestamp']
+                })
+
+        return render_template('load_game.html', saves=saves, is_vercel=True)
 
     save_dir = 'saves'
     if not os.path.exists(save_dir):
@@ -754,20 +779,40 @@ def load_game():
 
 @app.route('/load_game_file/<filename>')
 def load_game_file(filename):
-    save_dir = 'saves'
-    filepath = os.path.join(save_dir, filename)
-    
-    if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8') as f:
-            game_data = json.load(f)
-        # Инициализируем selected_players, если его нет в сохранении
-        if 'selected_players' not in game_data:
-            game_data['selected_players'] = []
-        session['game_data'] = game_data
-        session['current_round'] = game_data.get('current_round', 1)
-        return redirect(url_for('game_page', page=1))
-    else:
+    # Проверяем, работаем ли мы на Vercel и это сессионное сохранение
+    is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
+
+    if is_vercel and filename.startswith('session_'):
+        # Загружаем из сессии на Vercel
+        if 'saved_games' in session and session['saved_games']:
+            timestamp = filename.replace('session_', '')
+            for save_data in session['saved_games']:
+                if save_data['timestamp'] == timestamp:
+                    game_data = save_data['game_data']
+                    # Инициализируем selected_players, если его нет в сохранении
+                    if 'selected_players' not in game_data:
+                        game_data['selected_players'] = []
+                    session['game_data'] = game_data
+                    session['current_round'] = game_data.get('current_round', 1)
+                    return redirect(url_for('game_page', page=1))
+
         return redirect(url_for('load_game'))
+    else:
+        # Загружаем с диска (локально)
+        save_dir = 'saves'
+        filepath = os.path.join(save_dir, filename)
+
+        if os.path.exists(filepath):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                game_data = json.load(f)
+            # Инициализируем selected_players, если его нет в сохранении
+            if 'selected_players' not in game_data:
+                game_data['selected_players'] = []
+            session['game_data'] = game_data
+            session['current_round'] = game_data.get('current_round', 1)
+            return redirect(url_for('game_page', page=1))
+        else:
+            return redirect(url_for('load_game'))
 
 @app.route('/update_lineup', methods=['POST'])
 def update_lineup():

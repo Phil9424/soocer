@@ -6,18 +6,34 @@
         <h1>💾 Загрузить игру</h1>
         
         {% if is_vercel %}
+        {% if saves %}
+        <div class="saves-list">
+            <h2 style="text-align: center; margin-bottom: 2rem;">💾 Сохраненные игры (сессия)</h2>
+            {% for save in saves %}
+            <div class="save-item">
+                <div class="save-info">
+                    <strong>🏆 {{ save.team }}</strong>
+                    <span class="save-date">📅 {{ save.timestamp }}</span>
+                    <span class="save-note" style="color: var(--text-secondary); font-size: 0.8rem;">(сессия Vercel)</span>
+                </div>
+                <a href="{{ url_for('load_game_file', filename=save.filename) }}" class="btn btn-success">🚀 Загрузить</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
         <div class="card" style="text-align: center; padding: 3rem;">
-            <h2 style="color: var(--warning); margin-bottom: 1rem;">⚠️ Сохранение недоступно</h2>
+            <h2 style="color: var(--warning); margin-bottom: 1rem;">💾 Нет сохраненных игр</h2>
             <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem;">
-                На Vercel сохранение игр на сервер недоступно из-за ограничений платформы.<br>
-                Используйте кнопку "💾 Сохр." на странице игры для сохранения в браузере.
+                Используйте кнопку "💾 Сохр." на странице игры для сохранения в сессии браузера.
             </p>
             <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
-                <strong>💡 Альтернатива:</strong><br>
-                Ваши достижения сохраняются автоматически в турнирной таблице и статистике бомбардиров.
+                <strong>💡 Примечание:</strong><br>
+                Сохранения хранятся в сессии и будут доступны до перезагрузки страницы.<br>
+                Ваши достижения сохраняются автоматически в турнирной таблице.
             </div>
             <a href="{{ url_for('index') }}" class="btn btn-primary">🏠 Назад в меню</a>
         </div>
+        {% endif %}
         {% elif saves %}
         <div class="saves-list">
             {% for save in saves %}
