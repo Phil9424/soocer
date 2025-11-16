@@ -231,6 +231,107 @@ def sort_squad_by_positions(squad, team_name):
         # Возвращаем несортированный состав в случае ошибки
         return squad
 
+def create_optimal_lineup(squad, team_name, target_gk=1, target_def=4, target_mid=4, target_fwd=2):
+    """Создает оптимальный состав команды с заданным количеством игроков по позициям"""
+    try:
+        # Получаем отсортированный состав
+        sorted_squad = sort_squad_by_positions(squad, team_name)
+
+        # Создаем словарь имя игрока -> оригинальный индекс для определения позиций
+        name_to_index = {}
+        for i, player_data in enumerate(SQUADS_2007_08[team_name]):
+            player_name = player_data[0] if isinstance(player_data, tuple) else player_data
+            name_to_index[player_name] = i
+
+        # Разделяем игроков по позициям
+        gk_players = []
+        def_players = []
+        mid_players = []
+        fwd_players = []
+
+        for player in sorted_squad:
+            original_index = name_to_index.get(player['name'], 0)
+            position = get_player_position(team_name, original_index)
+            if position == 'GK':
+                gk_players.append(player)
+            elif position == 'DEF':
+                def_players.append(player)
+            elif position == 'FWD':
+                fwd_players.append(player)
+            else:  # MID и остальные
+                mid_players.append(player)
+
+        # Формируем оптимальный состав
+        lineup = []
+
+        # Добавляем GK
+        for i in range(min(target_gk, len(gk_players))):
+            lineup.append({**gk_players[i], 'position': 'В'})
+
+        # Добавляем DEF
+        for i in range(min(target_def, len(def_players))):
+            lineup.append({**def_players[i], 'position': 'З'})
+
+        # Добавляем MID
+        for i in range(min(target_mid, len(mid_players))):
+            lineup.append({**mid_players[i], 'position': 'П'})
+
+        # Добавляем FWD
+        for i in range(min(target_fwd, len(fwd_players))):
+            lineup.append({**fwd_players[i], 'position': 'Н'})
+
+        # Если не хватает до 11 игроков, добавляем из оставшихся
+        while len(lineup) < 11:
+            added = False
+
+            # Проверяем GK
+            if len(gk_players) > target_gk:
+                for gk in gk_players[target_gk:]:
+                    if gk not in [p for p in lineup if p['name'] == gk['name']]:
+                        lineup.append({**gk, 'position': 'В'})
+                        added = True
+                        break
+                target_gk += 1
+
+            # Проверяем DEF
+            if not added and len(def_players) > target_def:
+                for df in def_players[target_def:]:
+                    if df not in [p for p in lineup if p['name'] == df['name']]:
+                        lineup.append({**df, 'position': 'З'})
+                        added = True
+                        break
+                target_def += 1
+
+            # Проверяем MID
+            if not added and len(mid_players) > target_mid:
+                for md in mid_players[target_mid:]:
+                    if md not in [p for p in lineup if p['name'] == md['name']]:
+                        lineup.append({**md, 'position': 'П'})
+                        added = True
+                        break
+                target_mid += 1
+
+            # Проверяем FWD
+            if not added and len(fwd_players) > target_fwd:
+                for fw in fwd_players[target_fwd:]:
+                    if fw not in [p for p in lineup if p['name'] == fw['name']]:
+                        lineup.append({**fw, 'position': 'Н'})
+                        added = True
+                        break
+                target_fwd += 1
+
+            if not added:
+                break  # Не можем добавить больше игроков
+
+        return lineup[:11]  # Гарантируем ровно 11 игроков
+
+    except Exception as e:
+        print(f"ERROR in create_optimal_lineup for {team_name}: {e}")
+        import traceback
+        traceback.print_exc()
+        # Возвращаем первые 11 игроков в случае ошибки
+        return squad[:11]
+
 # Функция для выбора бомбардира из состава пользователя
 def select_goal_scorer(game_data, lineup, match_goals=None):
     """Выбирает бомбардира с учетом позиций, рейтинга и предыдущих голов в матче для реализма"""
@@ -1486,26 +1587,8 @@ def match():
                 "rating": rating
             })
     
-    opponent_squad_sorted = sort_squad_by_positions(opponent_squad, opponent_team)
-
-    # Устанавливаем позиции для игроков соперника на основе их места в отсортированном составе
-    opponent_lineup = []
-    for i, player in enumerate(opponent_squad_sorted[:11]):
-        if i == 0:
-            position = 'В'  # Вратарь
-        elif i >= 1 and i <= 4:
-            position = 'З'  # Защитники
-        elif i >= 5 and i <= 8:
-            position = 'П'  # Полузащитники
-        elif i >= 9 and i <= 10:
-            position = 'Н'  # Нападение
-        else:
-            position = '-'
-
-        if opponent_team == 'Tottenham Hotspur' and player['name'] == 'Heurelho Gomes':
-            print(f"DEBUG Gomes display position: index {i} -> {position}")
-
-        opponent_lineup.append({**player, 'position': position})
+    # Формируем оптимальный состав: 1 GK + 4 DEF + 4 MID + 2 FWD = 11 игроков
+    opponent_lineup = create_optimal_lineup(opponent_squad, opponent_team)
     
     # Всегда создаем новые данные матча при заходе на страницу матча
     # Это гарантирует, что матч начинается с нуля
@@ -1618,23 +1701,8 @@ def match_action():
                         "rating": rating
                     })
 
-            opponent_squad_sorted = sort_squad_by_positions(opponent_squad, opponent_team)
-
-            # Устанавливаем позиции для игроков соперника на основе их места в отсортированном составе
-            opponent_lineup = []
-            for i, player in enumerate(opponent_squad_sorted[:11]):
-                if i == 0:
-                    position = 'В'  # Вратарь
-                elif i >= 1 and i <= 4:
-                    position = 'З'  # Защитники
-                elif i >= 5 and i <= 8:
-                    position = 'П'  # Полузащитники
-                elif i >= 9 and i <= 10:
-                    position = 'Н'  # Нападение
-                else:
-                    position = '-'
-
-                opponent_lineup.append({**player, 'position': position})
+            # Формируем оптимальный состав: 1 GK + 4 DEF + 4 MID + 2 FWD = 11 игроков
+            opponent_lineup = create_optimal_lineup(opponent_squad, opponent_team)
             # Обновление таймера
             minute = data.get('minute', 0)
             half = data.get('half', 1)
