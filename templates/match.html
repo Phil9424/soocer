@@ -365,19 +365,17 @@ function updateStatBars(matchData) {
     }
     
     // Обновляем xG
-    const xgMy = matchData.xg_my || 0;
-    const xgOpp = matchData.xg_opponent || 0;
-    const totalXg = Math.max(xgMy + xgOpp, 0.1);
-    const xgMyPercent = (xgMy / totalXg) * 100;
-    const xgOppPercent = (xgOpp / totalXg) * 100;
+    const totalXg = Math.max(matchData.xg_my + matchData.xg_opponent, 0.1);
+    const xgMyPercent = (matchData.xg_my / totalXg) * 100;
+    const xgOppPercent = (matchData.xg_opponent / totalXg) * 100;
     const xgBars = document.querySelectorAll('.stat-row:nth-child(4) .stat-bar');
     if (xgBars.length >= 2) {
         xgBars[0].style.width = xgMyPercent + '%';
         xgBars[1].style.width = xgOppPercent + '%';
         const xgValues = document.querySelectorAll('.stat-row:nth-child(4) .stat-value');
         if (xgValues.length >= 2) {
-            xgValues[0].textContent = (matchData.xg_my || 0).toFixed(2);
-            xgValues[1].textContent = (matchData.xg_opponent || 0).toFixed(2);
+            xgValues[0].textContent = matchData.xg_my.toFixed(2);
+            xgValues[1].textContent = matchData.xg_opponent.toFixed(2);
         }
     }
 }

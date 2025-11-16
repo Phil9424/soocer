@@ -9,7 +9,7 @@
     <meta http-equiv="Expires" content="0">
     <meta http-equiv="Cache-Control" content="max-age=0">
     <title>{% block title %}Футбольный Менеджер{% endblock %}</title>
-    <link rel="stylesheet" href="/static/style.css?v=20241116020">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20241116020&t={{ range(1, 100)|random }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
