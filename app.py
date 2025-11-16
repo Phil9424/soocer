@@ -88,6 +88,42 @@ def get_player_position(team_name, player_index):
 
     return 'MID'  # По умолчанию
 
+def sort_squad_by_positions(squad, team_name):
+    """Сортирует состав команды по позициям: GK, DEF, MID, FWD"""
+    if not squad or team_name not in SQUADS_2007_08:
+        return squad
+
+    # Создаем словарь игрок -> оригинальный индекс
+    player_to_index = {}
+    for i, player_data in enumerate(SQUADS_2007_08[team_name]):
+        player_name = player_data[0] if isinstance(player_data, tuple) else player_data
+        # Находим соответствующего игрока в squad
+        for squad_player in squad:
+            if squad_player['name'] == player_name:
+                player_to_index[squad_player] = i
+                break
+
+    # Разделяем игроков по позициям
+    gk_players = []
+    def_players = []
+    mid_players = []
+    fwd_players = []
+
+    for player in squad:
+        original_index = player_to_index.get(player, 0)
+        position = get_player_position(team_name, original_index)
+        if position == 'GK':
+            gk_players.append(player)
+        elif position == 'DEF':
+            def_players.append(player)
+        elif position == 'FWD':
+            fwd_players.append(player)
+        else:  # MID и остальные
+            mid_players.append(player)
+
+    # Возвращаем отсортированный состав
+    return gk_players + def_players + mid_players + fwd_players
+
 # Функция для выбора бомбардира из состава пользователя
 def select_goal_scorer(game_data, lineup, match_goals=None):
     """Выбирает бомбардира с учетом позиций, рейтинга и предыдущих голов в матче для реализма"""
@@ -612,6 +648,9 @@ def generate_game_data(team_name):
                 "name": player_name,
                 "rating": rating
             })
+
+        # Сортируем состав по позициям для реализма
+        squad = sort_squad_by_positions(squad, team_name)
     else:
         # Fallback на случайные имена, если команда не найдена
         first_names = ["John", "James", "Michael", "David", "Robert"]
@@ -1505,12 +1544,16 @@ def match_action():
                                 home_squad.append({"name": player_data[0], "rating": player_data[1]})
                             else:
                                 home_squad.append({"name": player_data, "rating": 70})
+                        # Сортируем состав по позициям
+                        home_squad = sort_squad_by_positions(home_squad, home)
                     if away in SQUADS_2007_08:
                         for player_data in SQUADS_2007_08[away]:
                             if isinstance(player_data, tuple):
                                 away_squad.append({"name": player_data[0], "rating": player_data[1]})
                             else:
                                 away_squad.append({"name": player_data, "rating": 70})
+                        # Сортируем состав по позициям
+                        away_squad = sort_squad_by_positions(away_squad, away)
 
                     # Генерируем голы для домашней команды
                     for _ in range(home_goals_left):
