@@ -709,6 +709,9 @@ def save_game():
     # Проверяем, работаем ли мы на Vercel
     is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
 
+    print(f"DEBUG save_game: is_vercel={is_vercel}")  # DEBUG
+    print(f"DEBUG save_game: game_data team_name={session['game_data'].get('team_name')}")  # DEBUG
+
     if is_vercel:
         # На Vercel сохраняем в сессии вместо файла
         if 'saved_games' not in session:
@@ -724,6 +727,8 @@ def save_game():
         # Сохраняем только последнее сохранение (из-за ограничений сессии)
         session['saved_games'] = [save_data]
         session.modified = True
+
+        print(f"DEBUG save_game: saved to session, saved_games now={session['saved_games']}")  # DEBUG
 
         return jsonify({"success": True, "message": "Игра сохранена в сессии! (Vercel)"})
     else:
@@ -745,17 +750,26 @@ def load_game():
     # Проверяем, работаем ли мы на Vercel
     is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
 
+    print(f"DEBUG load_game: is_vercel={is_vercel}")  # DEBUG
+    print(f"DEBUG load_game: session keys={list(session.keys())}")  # DEBUG
+    print(f"DEBUG load_game: saved_games in session={'saved_games' in session}")  # DEBUG
+    if 'saved_games' in session:
+        print(f"DEBUG load_game: saved_games content={session['saved_games']}")  # DEBUG
+
     if is_vercel:
         # На Vercel показываем сохраненные игры из сессии
         saves = []
         if 'saved_games' in session and session['saved_games']:
+            print(f"DEBUG load_game: processing {len(session['saved_games'])} saves")  # DEBUG
             for save_data in session['saved_games']:
                 saves.append({
                     'filename': f"session_{save_data['timestamp']}",
                     'team': save_data.get('team_name', 'Unknown'),
                     'timestamp': save_data['timestamp']
                 })
+                print(f"DEBUG load_game: added save {save_data['team_name']}")  # DEBUG
 
+        print(f"DEBUG load_game: returning {len(saves)} saves to template")  # DEBUG
         return render_template('load_game.html', saves=saves, is_vercel=True)
 
     save_dir = 'saves'
