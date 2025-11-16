@@ -90,39 +90,53 @@ def get_player_position(team_name, player_index):
 
 def sort_squad_by_positions(squad, team_name):
     """Сортирует состав команды по позициям: GK, DEF, MID, FWD"""
-    if not squad or team_name not in SQUADS_2007_08:
+    try:
+        if not squad:
+            return squad
+
+        if team_name not in SQUADS_2007_08:
+            print(f"WARNING: team {team_name} not in SQUADS_2007_08, returning unsorted squad")
+            return squad
+
+        # Создаем словарь игрок -> оригинальный индекс
+        player_to_index = {}
+        for i, player_data in enumerate(SQUADS_2007_08[team_name]):
+            player_name = player_data[0] if isinstance(player_data, tuple) else player_data
+            # Находим соответствующего игрока в squad
+            for squad_player in squad:
+                if squad_player['name'] == player_name:
+                    player_to_index[squad_player] = i
+                    break
+
+        # Разделяем игроков по позициям
+        gk_players = []
+        def_players = []
+        mid_players = []
+        fwd_players = []
+
+        for player in squad:
+            original_index = player_to_index.get(player, 0)
+            position = get_player_position(team_name, original_index)
+            if position == 'GK':
+                gk_players.append(player)
+            elif position == 'DEF':
+                def_players.append(player)
+            elif position == 'FWD':
+                fwd_players.append(player)
+            else:  # MID и остальные
+                mid_players.append(player)
+
+        # Возвращаем отсортированный состав
+        result = gk_players + def_players + mid_players + fwd_players
+        print(f"DEBUG sort_squad: {team_name} - GK:{len(gk_players)}, DEF:{len(def_players)}, MID:{len(mid_players)}, FWD:{len(fwd_players)}")
+        return result
+
+    except Exception as e:
+        print(f"ERROR in sort_squad_by_positions for {team_name}: {e}")
+        import traceback
+        traceback.print_exc()
+        # Возвращаем несортированный состав в случае ошибки
         return squad
-
-    # Создаем словарь игрок -> оригинальный индекс
-    player_to_index = {}
-    for i, player_data in enumerate(SQUADS_2007_08[team_name]):
-        player_name = player_data[0] if isinstance(player_data, tuple) else player_data
-        # Находим соответствующего игрока в squad
-        for squad_player in squad:
-            if squad_player['name'] == player_name:
-                player_to_index[squad_player] = i
-                break
-
-    # Разделяем игроков по позициям
-    gk_players = []
-    def_players = []
-    mid_players = []
-    fwd_players = []
-
-    for player in squad:
-        original_index = player_to_index.get(player, 0)
-        position = get_player_position(team_name, original_index)
-        if position == 'GK':
-            gk_players.append(player)
-        elif position == 'DEF':
-            def_players.append(player)
-        elif position == 'FWD':
-            fwd_players.append(player)
-        else:  # MID и остальные
-            mid_players.append(player)
-
-    # Возвращаем отсортированный состав
-    return gk_players + def_players + mid_players + fwd_players
 
 # Функция для выбора бомбардира из состава пользователя
 def select_goal_scorer(game_data, lineup, match_goals=None):
@@ -846,20 +860,34 @@ def new_game():
 
 @app.route('/start_game', methods=['POST'])
 def start_game():
-    team_name = request.form.get('team')
-    if team_name not in TEAMS:
-        return redirect(url_for('new_game'))
+    try:
+        team_name = request.form.get('team')
+        print(f"DEBUG start_game: team_name = {team_name}")
 
-    # Очищаем старые данные тура для новой игры
-    session.pop('current_round', None)
-    session.pop('custom_schedule', None)
-    session.pop('match_results', None)  # Очищаем результаты предыдущих матчей
+        if team_name not in TEAMS:
+            print(f"DEBUG start_game: team {team_name} not in TEAMS")
+            return redirect(url_for('new_game'))
 
-    game_data = generate_game_data(team_name)
-    session['game_data'] = game_data
-    session['current_round'] = game_data['current_round']
+        # Очищаем старые данные тура для новой игры
+        session.pop('current_round', None)
+        session.pop('custom_schedule', None)
+        session.pop('match_results', None)  # Очищаем результаты предыдущих матчей
 
-    return redirect(url_for('game_page', page=1))
+        print(f"DEBUG start_game: calling generate_game_data for {team_name}")
+        game_data = generate_game_data(team_name)
+        print(f"DEBUG start_game: game_data generated successfully")
+
+        session['game_data'] = game_data
+        session['current_round'] = game_data['current_round']
+
+        print(f"DEBUG start_game: redirecting to game_page")
+        return redirect(url_for('game_page', page=1))
+
+    except Exception as e:
+        print(f"ERROR in start_game: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"Internal Server Error: {str(e)}", 500
 
 @app.route('/game/<int:page>')
 def game_page(page):
