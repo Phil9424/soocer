@@ -9,19 +9,24 @@
 
         <!-- Секция выбора тактики -->
         <div class="tactic-section">
-            <h2>⚽ Тактика на следующий матч</h2>
-            <div class="current-tactic">
-                <span>Текущая тактика: <strong id="current-tactic-name">{{ data.current_tactic|default('balanced') | replace('balanced', 'Нейтральная игра') | replace('tiki_taka', 'Тики-така') | replace('catenaccio', 'Катеначчо') | replace('bus', 'Автобус') | replace('all_out_attack', 'Все в атаку') }}</strong></span>
+            <div class="tactic-header" onclick="toggleTactics()">
+                <h2>⚽ Тактика на следующий матч</h2>
+                <span class="toggle-icon" id="tactic-toggle">▼</span>
             </div>
-
-            <div class="tactic-grid">
-                {% for tactic_key, tactic in [('balanced', {'name': 'Нейтральная игра', 'description': 'Сбалансированная тактика 50/50'}), ('tiki_taka', {'name': 'Тики-така', 'description': 'Высокое владение мячом, спокойный футбол'}), ('catenaccio', {'name': 'Катеначчо', 'description': 'Атака после гола, затем оборона'}), ('bus', {'name': 'Автобус', 'description': 'Глухая оборона'}), ('all_out_attack', {'name': 'Все в атаку', 'description': 'Агрессивная атака'})] %}
-                <div class="tactic-card {% if data.current_tactic|default('balanced') == tactic_key %}active{% endif %}" data-tactic="{{ tactic_key }}">
-                    <h3>{{ tactic.name }}</h3>
-                    <p>{{ tactic.description }}</p>
-                    <button class="btn btn-secondary select-tactic-btn" data-tactic="{{ tactic_key }}">Выбрать</button>
+            <div class="tactic-content" id="tactic-content">
+                <div class="current-tactic">
+                    <span>Текущая тактика: <strong id="current-tactic-name">{{ data.current_tactic|default('balanced') | replace('balanced', 'Нейтральная игра') | replace('tiki_taka', 'Тики-така') | replace('catenaccio', 'Катеначчо') | replace('bus', 'Автобус') | replace('all_out_attack', 'Все в атаку') }}</strong></span>
                 </div>
-                {% endfor %}
+
+                <div class="tactic-grid">
+                    {% for tactic_key, tactic in [('balanced', {'name': 'Нейтральная игра', 'description': 'Сбалансированная тактика 50/50'}), ('tiki_taka', {'name': 'Тики-така', 'description': 'Высокое владение мячом, спокойный футбол'}), ('catenaccio', {'name': 'Катеначчо', 'description': 'Атака после гола, затем оборона'}), ('bus', {'name': 'Автобус', 'description': 'Глухая оборона'}), ('all_out_attack', {'name': 'Все в атаку', 'description': 'Агрессивная атака'})] %}
+                    <div class="tactic-card {% if data.current_tactic|default('balanced') == tactic_key %}active{% endif %}" data-tactic="{{ tactic_key }}">
+                        <h3>{{ tactic.name }}</h3>
+                        <p>{{ tactic.description }}</p>
+                        <button class="btn btn-secondary select-tactic-btn" data-tactic="{{ tactic_key }}">Выбрать</button>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
         
@@ -235,7 +240,31 @@ document.addEventListener('click', function(e) {
 // Инициализируем при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     initSwapSystem();
+
+    // По умолчанию сворачиваем тактику
+    const content = document.getElementById('tactic-content');
+    if (content) {
+        content.style.display = 'none';
+        const toggle = document.getElementById('tactic-toggle');
+        if (toggle) {
+            toggle.textContent = '▶';
+        }
+    }
 });
+
+// Функция сворачивания/разворачивания секции тактики
+function toggleTactics() {
+    const content = document.getElementById('tactic-content');
+    const toggle = document.getElementById('tactic-toggle');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        toggle.textContent = '▼';
+    } else {
+        content.style.display = 'none';
+        toggle.textContent = '▶';
+    }
+}
 
 function getPositionByIndex(index) {
     if (index === 0) return 'В';  // Вратарь
