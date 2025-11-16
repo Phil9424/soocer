@@ -15,37 +15,41 @@
 
         <div class="scorers-container">
             {% if scorers %}
-                <div class="scorers-grid">
-                    {% for scorer in scorers %}
-                    <div class="scorer-card {% if loop.index <= 3 %}top-scorer{% endif %}">
-                        <div class="scorer-position">
-                            <div class="position-number">
-                                {% if loop.index == 1 %}🥇
-                                {% elif loop.index == 2 %}🥈
-                                {% elif loop.index == 3 %}🥉
-                                {% else %}{{ loop.index }}{% endif %}
-                            </div>
-                        </div>
-                        <div class="scorer-avatar">
-                            <div class="avatar-circle">
-                                {% if loop.index == 1 %}👑
-                                {% elif loop.index == 2 %}⭐
-                                {% elif loop.index == 3 %}🏅
-                                {% else %}⚽{% endif %}
-                            </div>
-                        </div>
-                        <div class="scorer-info">
-                            <h3 class="scorer-name">{{ scorer.name }}</h3>
-                            <p class="scorer-team">{{ scorer.team }}</p>
-                        </div>
-                        <div class="scorer-stats">
-                            <div class="goals-count">{{ scorer.goals }}</div>
-                            <div class="goals-label">
-                                {% if scorer.goals == 1 %}гол{% elif scorer.goals < 5 %}гола{% else %}голов{% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
+                <div class="table-container">
+                    <table class="scorers-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Игрок</th>
+                                <th>Команда</th>
+                                <th style="width: 80px; text-align: center;">Голы</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for scorer in scorers %}
+                            <tr class="{% if loop.index <= 3 %}top-scorer-row{% endif %}">
+                                <td class="position-cell">
+                                    {% if loop.index == 1 %}
+                                        <span class="medal">🥇</span>
+                                    {% elif loop.index == 2 %}
+                                        <span class="medal">🥈</span>
+                                    {% elif loop.index == 3 %}
+                                        <span class="medal">🥉</span>
+                                    {% else %}
+                                        <span class="position-number">{{ loop.index }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="player-cell">
+                                    <strong>{{ scorer.name }}</strong>
+                                </td>
+                                <td class="team-cell">{{ scorer.team }}</td>
+                                <td class="goals-cell">
+                                    <span class="goals-count">{{ scorer.goals }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             {% else %}
                 <div class="no-scorers">
