@@ -26,6 +26,10 @@ def get_player_position(team_name, player_index):
 def index():
     return render_template('index.html')
 
+@app.route('/new_game')
+def new_game():
+    return render_template('select_team.html', teams=TEAMS, preselected_team='')
+
 @app.route('/match')
 def match():
     try:
