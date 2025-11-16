@@ -1215,11 +1215,14 @@ def match_action():
                 })
                 match_data['xg_opponent'] = 0.0
 
+            # Сохраняем обновленные данные матча в сессии
+            session['match_data'] = match_data
             return jsonify({"success": True, "match_data": match_data})
 
         elif action == 'start_second_half':
             match_data['half'] = 2
             match_data['minute'] = 46
+            session['match_data'] = match_data
             return jsonify({"success": True, "match_data": match_data})
 
         elif action == 'end_match':
