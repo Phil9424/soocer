@@ -8,21 +8,84 @@ app.secret_key = 'football_manager_secret_key_2024'
 
 # Функция для определения позиции игрока
 def get_player_position(team_name, player_index):
-    """Определяет позицию игрока по его месту в составе"""
+    """Определяет позицию игрока по его месту в составе с учетом реальных позиций"""
     if team_name in SQUADS_2007_08:
-        squad_size = len(SQUADS_2007_08[team_name])
-        # Вратарь (обычно 0-1)
-        if player_index < 2:
-            return 'GK'
-        # Защитники (обычно 2-8)
-        elif player_index < 9:
-            return 'DEF'
-        # Полузащитники (обычно 9-14)
-        elif player_index < 15:
+        squad = SQUADS_2007_08[team_name]
+
+        # Если индекс выходит за пределы, возвращаем по умолчанию
+        if player_index >= len(squad):
             return 'MID'
-        # Нападающие (остальные)
-        else:
+
+        player_data = squad[player_index]
+        player_name = player_data[0] if isinstance(player_data, tuple) else player_data
+
+        # Известные вратари
+        goalkeepers = [
+            "Manuel Almunia", "Jens Lehmann", "Scott Carson", "Stuart Taylor", "Maik Taylor", "Colin Doyle",
+            "Petr Cech", "Carlo Cudicini", "Paul Robinson", "Chris Kirkland", "Brad Friedel", "Thomas Sorensen",
+            "Jussi Jaaskelainen", "Ali Al Habsi", "Mark Schwarzer", "Robert Green", "Roy Carroll", "Chris Kirkland",
+            "Marton Fulop", "Boaz Myhill", "Luke Steele", "Heurelho Gomes", "Craig Gordon", "David James",
+            "Shay Given", "Steve Harper", "Robbie Keane", "Joe Hart", "Ben Foster", "Wayne Hennessey"
+        ]
+
+        # Известные защитники
+        defenders = [
+            "Gael Clichy", "Kolo Toure", "William Gallas", "Philippe Senderos", "Bacary Sagna", "Emmanuel Eboue",
+            "Olof Mellberg", "Martin Laursen", "Zat Knight", "Curtis Davies", "Wilfred Bouma", "Nicky Shorey",
+            "Stephen Kelly", "Liam Ridgewell", "Radhi Jaidi", "Martin Taylor", "Franck Queudrue", "Stuart Parnaby",
+            "Rio Ferdinand", "Nemanja Vidic", "Patrice Evra", "Gary Neville", "Mikael Silvestre", "Wes Brown",
+            "John Terry", "Frank Lampard", "Paulo Ferreira", "Ashley Cole", "Claude Makelele", "Damien Duff",
+            "Joe Cole", "Didier Drogba", "Nicolas Anelka", "Andriy Shevchenko", "Michael Essien", "Salomon Kalou",
+            "Wayne Bridge", "Juliano Belletti", "Geremi", "Shaun Wright-Phillips", "Steve Sidwell", "Michael Ballack",
+            "Florent Malouda", "Robbie Keane", "Jermaine Jenas", "Michael Carrick", "Owen Hargreaves", "Anderson",
+            "Cristiano Ronaldo", "Wayne Rooney", "Carlos Tevez", "Louis Saha", "Nani", "Ryan Giggs", "Paul Scholes",
+            "Ji-sung Park", "Darren Fletcher", "Michael Carrick", "John O'Shea", "Wes Brown", "Rafael", "Fabio",
+            "Titus Bramble", "Kevin Nolan", "Emile Heskey", "Matthew Taylor", "Paul Konchesky", "Hayden Mullins",
+            "Zoltan Gera", "Matthew Etherington", "Jimmy Floyd Hasselbaink", "Dave Kitson", "Marlon King",
+            "Kevin Davies", "Joleon Lescott", "Nicky Hunt", "Kevin Kilbane", "Julien Faubert", "Paul Stalteri",
+            "Hayden Foxe", "Chris Baird", "David Dunn", "Brett Emerton", "Andy Todd", "Kenny Cunningham",
+            "Damien Francis", "Marlon Harewood", "Neil Kilkenny", "Julian Gray", "Rowan Vine", "Darren Huckerby",
+            "David Bentley", "Dean Ashton", "Shola Ameobi", "Antoine Sibierski", "Emmanuel Adebayor", "Robin van Persie",
+            "Theo Walcott", "Cesc Fabregas", "Gilberto Silva", "Tomas Rosicky", "Alexander Hleb", "Mathieu Flamini",
+            "Denilson", "Abou Diaby", "Alexandre Song", "Justin Hoyte", "Armand Traore", "Lukasz Fabianski",
+            "Gareth Barry", "Nigel Reo-Coker", "Stiliyan Petrov", "Ashley Young", "Shaun Maloney", "Gabriel Agbonlahor",
+            "John Carew", "Luke Moore", "Craig Gardner", "Isaiah Osbourne", "Patrik Berger", "Moustapha Salifou",
+            "Wayne Routledge", "Nathan Delfouneso"
+        ]
+
+        # Известные нападающие
+        forwards = [
+            "Robin van Persie", "Emmanuel Adebayor", "Nicklas Bendtner", "Eduardo", "John Carew", "Marlon Harewood",
+            "Luke Moore", "Gabriel Agbonlahor", "Cameron Jerome", "Mikael Forssell", "James McFadden", "Garry O'Connor",
+            "Daniel de Ridder", "Olivier Kapo", "Rafael Schmitz", "Didier Drogba", "Nicolas Anelka", "Andriy Shevchenko",
+            "Salomon Kalou", "Wayne Rooney", "Carlos Tevez", "Louis Saha", "Cristiano Ronaldo", "Ji-sung Park",
+            "Alan Smith", "Ole Gunnar Solskjaer", "Dimitar Berbatov", "Michael Owen", "Peter Crouch", "Craig Bellamy",
+            "Robbie Keane", "Jermaine Defoe", "Mido", "Teemu Tainio", "Niko Kranjcar", "Matthew Taylor", "Dave Kitson",
+            "Marlon King", "Kevin Davies", "Matthew Taylor", "Zoltan Gera", "Jimmy Floyd Hasselbaink", "Matthew Etherington",
+            "Dean Ashton", "Shola Ameobi", "Antoine Sibierski", "Kenny Miller", "Craig Bellamy", "John Hartson",
+            "Robbie Keane", "Jermaine Defoe", "Andy Johnson", "Dean Ashton", "Teddy Sheringham", "Marcus Bent",
+            "Brian McBride", "Darren Huckerby", "David Bentley", "Chris Sutton", "Kevin Phillips", "Stern John",
+            "Niall Quinn", "Dean Windass", "Rowan Vine", "Ian Moore", "Danny Webber", "Scott Dobie", "Steve Howard"
+        ]
+
+        # Проверяем по имени
+        if player_name in goalkeepers:
+            return 'GK'
+        elif player_name in forwards:
             return 'FWD'
+        elif player_name in defenders:
+            return 'DEF'
+        else:
+            # Fallback на позицию по индексу
+            if player_index < 2:
+                return 'GK'
+            elif player_index < 8:
+                return 'DEF'
+            elif player_index < 14:
+                return 'MID'
+            else:
+                return 'FWD'
+
     return 'MID'  # По умолчанию
 
 # Функция для выбора бомбардира из состава пользователя
@@ -47,10 +110,12 @@ def select_goal_scorer(game_data, lineup, match_goals=None):
         name = player['name']
         rating = player.get('rating', 70)
 
-        # Базовые веса по позициям
+        # ВРАТАРИ НЕ МОГУТ ЗАБИВАТЬ ГОЛЫ!
         if position == 'GK':
-            base_weight = 1  # Вратари забивают очень редко
-        elif position == 'DEF':
+            continue  # Пропускаем вратарей полностью
+
+        # Базовые веса по позициям
+        if position == 'DEF':
             base_weight = 3  # Защитники забивают реже
         elif position == 'MID':
             base_weight = 5  # Полузащитники забивают чаще
@@ -90,7 +155,13 @@ def select_goal_scorer(game_data, lineup, match_goals=None):
     if scorers_with_weights:
         return random.choice(scorers_with_weights)
     else:
-        return random.choice([p['name'] for p in lineup])
+        # Если нет подходящих игроков, выбираем случайного полевого игрока
+        field_players = [p['name'] for i, p in enumerate(lineup)
+                        if get_player_position(game_data['team_name'], i) != 'GK']
+        if field_players:
+            return random.choice(field_players)
+        else:
+            return random.choice([p['name'] for p in lineup])
 
 # Функция для выбора бомбардира соперника
 def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
@@ -114,10 +185,12 @@ def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
         name = player['name']
         rating = player.get('rating', 70)
 
-        # Базовые веса по позициям
+        # ВРАТАРИ НЕ МОГУТ ЗАБИВАТЬ ГОЛЫ!
         if position == 'GK':
-            base_weight = 1  # Вратари забивают очень редко
-        elif position == 'DEF':
+            continue  # Пропускаем вратарей полностью
+
+        # Базовые веса по позициям
+        if position == 'DEF':
             base_weight = 3  # Защитники забивают реже
         elif position == 'MID':
             base_weight = 5  # Полузащитники забивают чаще
@@ -157,7 +230,13 @@ def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
     if scorers_with_weights:
         return random.choice(scorers_with_weights)
     else:
-        return random.choice([p['name'] for p in lineup])
+        # Если нет подходящих игроков, выбираем случайного полевого игрока
+        field_players = [p['name'] for i, p in enumerate(lineup)
+                        if get_player_position(team_name, i) != 'GK']
+        if field_players:
+            return random.choice(field_players)
+        else:
+            return random.choice([p['name'] for p in lineup])
 
 # Функция для получения среднего рейтинга команды
 def get_team_average_rating(team_name):
@@ -1466,7 +1545,6 @@ def match_action():
             if 'match_results' not in session:
                 session['match_results'] = []
             session['match_results'].extend(round_results)
-            print(f"DEBUG: Added {len(round_results)} matches to match_results. Total: {len(session['match_results'])}")
 
             # Обновляем турнирную таблицу
             update_league_table(round_results)
@@ -1553,14 +1631,11 @@ def top_scorers():
 
     # Проверяем сохраненные результаты матчей
     if 'match_results' in session:
-        print(f"DEBUG top_scorers: Found {len(session['match_results'])} match results")
         for result in session['match_results']:
             if 'goals' in result:
-                print(f"DEBUG top_scorers: Match {result.get('home_team', 'Unknown')} vs {result.get('away_team', 'Unknown')} has {len(result['goals'])} goals")
                 for goal in result['goals']:
                     scorer_name = goal['scorer']
                     team_name = goal['team']
-                    print(f"DEBUG top_scorers: Goal by {scorer_name} ({team_name})")
 
                     if scorer_name not in scorers_stats:
                         scorers_stats[scorer_name] = {
@@ -1569,8 +1644,6 @@ def top_scorers():
                             'goals': 0
                         }
                     scorers_stats[scorer_name]['goals'] += 1
-    else:
-        print("DEBUG top_scorers: No match_results in session")
 
     # Преобразуем в список и сортируем по количеству голов
     scorers_list = list(scorers_stats.values())
