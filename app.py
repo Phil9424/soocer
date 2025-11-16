@@ -971,6 +971,7 @@ def start_game():
         session.pop('current_round', None)
         session.pop('custom_schedule', None)
         session.pop('match_results', None)  # Очищаем результаты предыдущих матчей
+        session.pop('last_round_results', None)  # Очищаем результаты последнего тура
 
         print(f"DEBUG start_game: calling generate_game_data for {team_name}")
         game_data = generate_game_data(team_name)
@@ -1734,7 +1735,10 @@ def match_action():
                         'is_user_match': False
                     })
 
-            # Добавляем результаты текущего тура к существующим (не перезаписываем)
+            # Сохраняем результаты текущего тура отдельно для таблицы итогов
+            session['last_round_results'] = round_results
+
+            # Добавляем результаты текущего тура к накопительной статистике для бомбардиров
             if 'match_results' not in session:
                 session['match_results'] = []
             session['match_results'].extend(round_results)
@@ -1806,10 +1810,10 @@ def match_action():
 
 @app.route('/match_results')
 def match_results():
-    if 'match_results' not in session:
+    if 'last_round_results' not in session:
         return redirect(url_for('game_page', page=1))
 
-    results = session['match_results']
+    results = session['last_round_results']
     return render_template('match_results.html', results=results)
 
 @app.route('/top_scorers')
