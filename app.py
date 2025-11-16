@@ -176,14 +176,14 @@ def get_player_position(team_name, player_index):
         else:
             # Fallback на позицию по индексу для неизвестных игроков
             # Fallback на позицию по индексу для неизвестных игроков
-            if player_index < 2:
-                return 'GK'
+        if player_index < 2:
+            return 'GK'
             elif player_index < 8:
-                return 'DEF'
+            return 'DEF'
             elif player_index < 14:
-                return 'MID'
-            else:
-                return 'FWD'
+            return 'MID'
+        else:
+            return 'FWD'
     return 'MID'  # По умолчанию
 
 def sort_squad_by_positions(squad, team_name):
@@ -412,8 +412,8 @@ def select_goal_scorer(game_data, lineup, match_goals=None):
                         if get_player_position(game_data['team_name'], i) != 'GK']
         if field_players:
             return random.choice(field_players)
-        else:
-            return random.choice([p['name'] for p in lineup])
+    else:
+        return random.choice([p['name'] for p in lineup])
 
 # Функция для выбора бомбардира соперника
 def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
@@ -487,8 +487,8 @@ def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
                         if get_player_position(team_name, i) != 'GK']
         if field_players:
             return random.choice(field_players)
-        else:
-            return random.choice([p['name'] for p in lineup])
+    else:
+        return random.choice([p['name'] for p in lineup])
 
 # Тактики игры
 TACTICS = {
@@ -1104,12 +1104,12 @@ def new_game():
 @app.route('/start_game', methods=['POST'])
 def start_game():
     try:
-        team_name = request.form.get('team')
+    team_name = request.form.get('team')
         print(f"DEBUG start_game: team_name = {team_name}")
 
-        if team_name not in TEAMS:
+    if team_name not in TEAMS:
             print(f"DEBUG start_game: team {team_name} not in TEAMS")
-            return redirect(url_for('new_game'))
+        return redirect(url_for('new_game'))
     
         # Очищаем старые данные тура для новой игры
         session.pop('current_round', None)
@@ -1118,14 +1118,14 @@ def start_game():
         session.pop('last_round_results', None)  # Очищаем результаты последнего тура
 
         print(f"DEBUG start_game: calling generate_game_data for {team_name}")
-        game_data = generate_game_data(team_name)
+    game_data = generate_game_data(team_name)
         print(f"DEBUG start_game: game_data generated successfully")
 
-        session['game_data'] = game_data
+    session['game_data'] = game_data
         session['current_round'] = game_data['current_round']
     
         print(f"DEBUG start_game: redirecting to game_page")
-        return redirect(url_for('game_page', page=1))
+    return redirect(url_for('game_page', page=1))
 
     except Exception as e:
         print(f"ERROR in start_game: {e}")
@@ -1202,20 +1202,20 @@ def save_game():
         return jsonify({"success": True, "message": "Сохранение обрабатывается браузером"})
     else:
         # На локальном сервере сохраняем на диск
-        if 'game_data' not in session:
-            return jsonify({"success": False, "message": "Нет данных для сохранения"})
-
-        save_dir = 'saves'
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{save_dir}/save_{timestamp}.json"
-
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(session['game_data'], f, ensure_ascii=False, indent=2)
-
-        return jsonify({"success": True, "message": "Игра сохранена!"})
+    if 'game_data' not in session:
+        return jsonify({"success": False, "message": "Нет данных для сохранения"})
+    
+    save_dir = 'saves'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{save_dir}/save_{timestamp}.json"
+    
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(session['game_data'], f, ensure_ascii=False, indent=2)
+    
+    return jsonify({"success": True, "message": "Игра сохранена!"})
 
 @app.route('/restore_game', methods=['POST'])
 def restore_game():
@@ -1290,20 +1290,20 @@ def load_game_file(filename):
         return redirect(url_for('load_game'))
     else:
         # Загружаем с диска (локально)
-        save_dir = 'saves'
-        filepath = os.path.join(save_dir, filename)
-
-        if os.path.exists(filepath):
-            with open(filepath, 'r', encoding='utf-8') as f:
-                game_data = json.load(f)
-            # Инициализируем selected_players, если его нет в сохранении
-            if 'selected_players' not in game_data:
-                game_data['selected_players'] = []
-            session['game_data'] = game_data
+    save_dir = 'saves'
+    filepath = os.path.join(save_dir, filename)
+    
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            game_data = json.load(f)
+        # Инициализируем selected_players, если его нет в сохранении
+        if 'selected_players' not in game_data:
+            game_data['selected_players'] = []
+        session['game_data'] = game_data
             session['current_round'] = game_data.get('current_round', 1)
-            return redirect(url_for('game_page', page=1))
-        else:
-            return redirect(url_for('load_game'))
+        return redirect(url_for('game_page', page=1))
+    else:
+        return redirect(url_for('load_game'))
 
 @app.route('/update_lineup', methods=['POST'])
 def update_lineup():
@@ -1520,20 +1520,38 @@ def match():
 @app.route('/match_action', methods=['POST'])
 def match_action():
     try:
-        if 'game_data' not in session or 'match_data' not in session:
+    if 'game_data' not in session or 'match_data' not in session:
             return jsonify({"success": False, "error": "Session not initialized"})
 
-        import random
+    import random
         data = request.get_json()
         action = data.get('action', '')
 
-        match_data = session['match_data']
-        game_data = session['game_data']
+    match_data = session['match_data']
+    game_data = session['game_data']
 
-        if action == 'tick':
+        # Инициализируем статистику если не существует
+        if 'shots_my' not in match_data:
+            match_data['shots_my'] = 0
+        if 'shots_opponent' not in match_data:
+            match_data['shots_opponent'] = 0
+        if 'shots_on_target_my' not in match_data:
+            match_data['shots_on_target_my'] = 0
+        if 'shots_on_target_opponent' not in match_data:
+            match_data['shots_on_target_opponent'] = 0
+        if 'possession_my' not in match_data:
+            match_data['possession_my'] = 50
+        if 'possession_opponent' not in match_data:
+            match_data['possession_opponent'] = 50
+        if 'xg_my' not in match_data:
+            match_data['xg_my'] = 0.0
+        if 'xg_opponent' not in match_data:
+            match_data['xg_opponent'] = 0.0
+    
+    if action == 'tick':
             # Обновляем таймер
-            minute = data.get('minute', 0)
-            half = data.get('half', 1)
+        minute = data.get('minute', 0)
+        half = data.get('half', 1)
             
             # Увеличиваем минуту
             minute += 1
@@ -1541,24 +1559,26 @@ def match_action():
                 minute = 45  # Останавливаемся на 45 минуте
             elif half == 2 and minute > 90:
                 minute = 90  # Матч окончен
-
-            match_data['minute'] = minute
-            match_data['half'] = half
-
+        
+        match_data['minute'] = minute
+        match_data['half'] = half
+        
             # Генерируем события
             events = []
             if random.random() < 0.08:  # 8% шанс события
                 if random.random() < 0.6:  # Моя команда
-                    match_data['shots_my'] = match_data.get('shots_my', 0) + 1
+                match_data['shots_my'] += 1
                     if random.random() < 0.4:  # Попадание
-                        match_data['shots_on_target_my'] = match_data.get('shots_on_target_my', 0) + 1
+                    match_data['shots_on_target_my'] += 1
+                        match_data['xg_my'] += random.uniform(0.05, 0.15)
                         if random.random() < 0.2:  # ГОЛ!
                             match_data['score_my'] = match_data.get('score_my', 0) + 1
                             events.append("⚽ ГОЛ! " + game_data['team_name'] + " забивает!")
                 else:  # Соперник
-                    match_data['shots_opponent'] = match_data.get('shots_opponent', 0) + 1
+                match_data['shots_opponent'] += 1
                     if random.random() < 0.4:  # Попадание
-                        match_data['shots_on_target_opponent'] = match_data.get('shots_on_target_opponent', 0) + 1
+                    match_data['shots_on_target_opponent'] += 1
+                        match_data['xg_opponent'] += random.uniform(0.05, 0.15)
                         if random.random() < 0.2:  # ГОЛ!
                             match_data['score_opponent'] = match_data.get('score_opponent', 0) + 1
                             events.append("⚽ ГОЛ! " + game_data['next_opponent'] + " забивает!")
@@ -1575,18 +1595,18 @@ def match_action():
                     "finished": minute >= 90,
                     "events": events,
                     "stats": {
-                        "shots": match_data.get('shots_my', 0),
-                        "shots_on_target": match_data.get('shots_on_target_my', 0),
-                        "possession": match_data.get('possession_my', 50),
-                        "xg": round(match_data.get('xg_my', 0.0), 2)
+                        "shots": match_data['shots_my'],
+                        "shots_on_target": match_data['shots_on_target_my'],
+                        "possession": match_data['possession_my'],
+                        "xg": round(match_data['xg_my'], 2)
                     },
                     "goals": match_data.get('goals', [])
                 }
             })
-
-        elif action == 'start_second_half':
-            match_data['half'] = 2
-            match_data['minute'] = 46
+        
+    elif action == 'start_second_half':
+        match_data['half'] = 2
+        match_data['minute'] = 46
             session['match_data'] = match_data
 
             return jsonify({
@@ -1601,8 +1621,8 @@ def match_action():
                     "goals": match_data.get('goals', [])
                 }
             })
-
-        elif action == 'end_match':
+    
+    elif action == 'end_match':
             # Простая версия завершения матча
             return jsonify({
                 "success": True,
