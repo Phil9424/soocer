@@ -26,5 +26,53 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем, есть ли предварительно выбранная команда
+    const preselectedTeam = '{{ preselected_team }}';
+
+    if (preselectedTeam) {
+        // Находим кнопку с этой командой и автоматически нажимаем ее
+        const teamButtons = document.querySelectorAll('.team-btn');
+
+        for (const button of teamButtons) {
+            if (button.value === preselectedTeam) {
+                // Добавляем визуальную индикацию выбора
+                button.style.border = '2px solid var(--primary-color)';
+                button.style.background = 'var(--primary-color-light)';
+
+                // Показываем сообщение
+                const message = document.createElement('div');
+                message.style.cssText = 'text-align: center; color: var(--primary-color); font-weight: bold; margin-bottom: 1rem;';
+                message.textContent = `🎯 Автоматически выбрана команда: ${preselectedTeam}`;
+
+                const teamSelection = document.querySelector('.team-selection');
+                teamSelection.insertBefore(message, document.querySelector('.team-list'));
+
+                // Автоматически отправляем форму через 2 секунды
+                setTimeout(() => {
+                    button.click();
+                }, 2000);
+
+                break;
+            }
+        }
+    }
+
+    // Также проверяем sessionStorage на предварительный выбор
+    try {
+        const sessionPreselected = sessionStorage.getItem('preselected_team');
+        if (sessionPreselected && !preselectedTeam) {
+            // Очищаем sessionStorage и перенаправляем с параметром
+            sessionStorage.removeItem('preselected_team');
+            window.location.href = `/new_game?team=${encodeURIComponent(sessionPreselected)}`;
+        }
+    } catch (e) {
+        console.log('Не удалось проверить sessionStorage');
+    }
+});
+</script>
+
 {% endblock %}
 

@@ -67,6 +67,15 @@
 
 {% block scripts %}
 <script>
+// Сохраняем данные игры в sessionStorage для возможности сохранения
+try {
+    // Получаем данные игры из шаблона (data)
+    const gameData = {{ data|tojson }};
+    sessionStorage.setItem('game_data', JSON.stringify(gameData));
+} catch (e) {
+    console.log('Не удалось сохранить данные игры в sessionStorage');
+}
+
 function saveGame() {
     // Проверяем, работаем ли мы на Vercel
     const isVercel = window.location.hostname.includes('vercel.app');
@@ -74,10 +83,27 @@ function saveGame() {
     if (isVercel) {
         // На Vercel сохраняем в localStorage браузера
         try {
+            // Получаем название команды из DOM
+            const teamNameElement = document.querySelector('h1');
+            const teamName = teamNameElement ? teamNameElement.textContent.replace('🏆 ', '').trim() : 'Неизвестная команда';
+
+            // Получаем текущие данные игры (если можем)
+            let gameData = null;
+            try {
+                // Пытаемся получить данные из sessionStorage (если они там есть)
+                const sessionData = sessionStorage.getItem('game_data');
+                if (sessionData) {
+                    gameData = JSON.parse(sessionData);
+                }
+            } catch (e) {
+                console.log('Не удалось получить данные игры из sessionStorage');
+            }
+
             // Создаем объект сохранения
             const saveData = {
                 timestamp: new Date().toISOString(),
-                teamName: 'Неизвестная команда', // Можно получить из DOM если нужно
+                teamName: teamName,
+                gameData: gameData, // Сохраняем данные игры если есть
                 note: 'Сохранено в браузере (Vercel)'
             };
 

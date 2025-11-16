@@ -648,7 +648,11 @@ def new_game():
     print(f"Всего команд в TEAMS: {len(TEAMS)}")
     print(f"Передаю {len(teams_with_logos)} команд в шаблон")
     print(f"Команды: {[t['name'] for t in teams_with_logos[:5]]}...")  # Первые 5 для проверки
-    return render_template('select_team.html', teams=teams_with_logos)
+
+    # Проверяем, есть ли предварительно выбранная команда
+    preselected_team = request.args.get('team', '')
+
+    return render_template('select_team.html', teams=teams_with_logos, preselected_team=preselected_team)
 
 @app.route('/start_game', methods=['POST'])
 def start_game():
@@ -726,6 +730,29 @@ def save_game():
             json.dump(session['game_data'], f, ensure_ascii=False, indent=2)
 
         return jsonify({"success": True, "message": "Игра сохранена!"})
+
+@app.route('/restore_game', methods=['POST'])
+def restore_game():
+    try:
+        data = request.get_json()
+        if not data or 'gameData' not in data:
+            return jsonify({"success": False, "message": "Нет данных для восстановления"})
+
+        game_data = data['gameData']
+
+        # Восстанавливаем сессию
+        session['game_data'] = game_data
+        session['current_round'] = game_data.get('current_round', 1)
+
+        # Убеждаемся, что selected_players определен
+        if 'selected_players' not in game_data:
+            game_data['selected_players'] = []
+
+        return jsonify({"success": True, "message": "Игра восстановлена успешно"})
+
+    except Exception as e:
+        print(f"Error restoring game: {e}")
+        return jsonify({"success": False, "message": "Ошибка при восстановлении игры"})
 
 @app.route('/load_game')
 def load_game():
