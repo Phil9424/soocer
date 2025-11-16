@@ -1696,18 +1696,61 @@ def match_action():
                     home_score = random.randint(0, 3)
                     away_score = random.randint(0, 3)
 
-                    # Простая генерация голов для отображения
+                    # Генерация голов с настоящими именами игроков
                     goals = []
+
+                    # Получаем составы команд для выбора бомбардиров
+                    home_squad = []
+                    away_squad = []
+
+                    if home in SQUADS_2007_08:
+                        for player_data in SQUADS_2007_08[home]:
+                            if isinstance(player_data, tuple):
+                                player_name, rating = player_data
+                            else:
+                                player_name = player_data
+                                rating = 70
+                            home_squad.append({'name': player_name, 'rating': rating})
+
+                    if away in SQUADS_2007_08:
+                        for player_data in SQUADS_2007_08[away]:
+                            if isinstance(player_data, tuple):
+                                player_name, rating = player_data
+                            else:
+                                player_name = player_data
+                                rating = 70
+                            away_squad.append({'name': player_name, 'rating': rating})
+
+                    # Выбираем бомбардиров (предпочитаем не вратарей)
+                    def select_scorer(team_squad, team_name):
+                        if not team_squad:
+                            return f"Игрок {team_name}"
+
+                        # Фильтруем не-вратарей
+                        non_gk_players = []
+                        for i, player in enumerate(team_squad):
+                            position = get_player_position(team_name, i)
+                            if position != 'GK':
+                                non_gk_players.append(player)
+
+                        if non_gk_players:
+                            return random.choice(non_gk_players)['name']
+                        else:
+                            return random.choice(team_squad)['name']
+
                     for i in range(home_score):
+                        scorer = select_scorer(home_squad, home)
                         goals.append({
                             'team': home,
-                            'scorer': f'Игрок {home} {i+1}',
+                            'scorer': scorer,
                             'minute': random.randint(1, 90)
                         })
+
                     for i in range(away_score):
+                        scorer = select_scorer(away_squad, away)
                         goals.append({
                             'team': away,
-                            'scorer': f'Игрок {away} {i+1}',
+                            'scorer': scorer,
                             'minute': random.randint(1, 90)
                         })
 
