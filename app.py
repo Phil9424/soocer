@@ -386,6 +386,45 @@ def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
         else:
             return random.choice([p['name'] for p in lineup])
 
+# Тактики игры
+TACTICS = {
+    'balanced': {
+        'name': 'Нейтральная игра',
+        'description': 'Сбалансированная тактика 50/50',
+        'attack_weight': 0.5,
+        'defense_weight': 0.5,
+        'possession_modifier': 1.0
+    },
+    'tiki_taka': {
+        'name': 'Тики-така',
+        'description': 'Высокое владение мячом, спокойный футбол',
+        'attack_weight': 0.65,
+        'defense_weight': 0.35,
+        'possession_modifier': 1.3
+    },
+    'catenaccio': {
+        'name': 'Катеначчо',
+        'description': 'Атака после гола, затем оборона',
+        'attack_weight': 0.2,
+        'defense_weight': 0.8,
+        'possession_modifier': 0.8
+    },
+    'bus': {
+        'name': 'Автобус',
+        'description': 'Глухая оборона',
+        'attack_weight': 0.05,
+        'defense_weight': 0.95,
+        'possession_modifier': 0.6
+    },
+    'all_out_attack': {
+        'name': 'Все в атаку',
+        'description': 'Агрессивная атака',
+        'attack_weight': 0.95,
+        'defense_weight': 0.05,
+        'possession_modifier': 1.1
+    }
+}
+
 # Функция для получения среднего рейтинга команды
 def get_team_average_rating(team_name):
     """Вычисляет средний рейтинг команды"""
@@ -908,6 +947,7 @@ def generate_game_data(team_name):
         "selected_players": selected_players,
         "table": table,
         "current_round": current_round,
+        "current_tactic": "balanced",  # По умолчанию нейтральная тактика
         "stadium_data": {
             "north": stadium_capacity["north"],
             "south": stadium_capacity["south"],
@@ -1663,23 +1703,87 @@ def match_action():
                     home_rating = get_team_average_rating(home)
                     away_rating = get_team_average_rating(away)
 
-                    # Вероятность победы зависит от разницы рейтингов
-                    rating_diff = home_rating - away_rating
+                    # Для нашего матча используем выбранную тактику, для других - случайную
+                    home_tactic = 'balanced'  # По умолчанию нейтральная
+                    away_tactic = 'balanced'  # По умолчанию нейтральная
+
+                    # Если это наш матч, используем выбранную тактику
+                    if home == match_data['my_team']:
+                        home_tactic = game_data.get('current_tactic', 'balanced')
+                    elif away == match_data['my_team']:
+                        away_tactic = game_data.get('current_tactic', 'balanced')
+
+                    # Для других матчей случайная тактика с небольшим уклоном к нейтральной
+                    if home != match_data['my_team'] and away != match_data['my_team']:
+                        # 40% нейтральная, остальные тактики равномерно
+                        tactic_options = ['balanced'] * 4 + list(TACTICS.keys())
+                        home_tactic = random.choice(tactic_options)
+                        away_tactic = random.choice(tactic_options)
+
+                    # Применяем влияние тактики на вероятности
+                    home_attack_weight = TACTICS[home_tactic]['attack_weight']
+                    home_defense_weight = TACTICS[home_tactic]['defense_weight']
+                    away_attack_weight = TACTICS[away_tactic]['attack_weight']
+                    away_defense_weight = TACTICS[away_tactic]['defense_weight']
+
+                    # Модифицируем рейтинги команд в зависимости от тактики
+                    home_effective_rating = home_rating * (home_attack_weight * 0.7 + home_defense_weight * 0.3)
+                    away_effective_rating = away_rating * (away_attack_weight * 0.7 + away_defense_weight * 0.3)
+
+                    # Вероятность победы зависит от разницы эффективных рейтингов
+                    rating_diff = home_effective_rating - away_effective_rating
                     home_win_prob = 0.5 + (rating_diff / 20)  # Максимум ±0.25 от 0.5
                     home_win_prob = max(0.2, min(0.8, home_win_prob))
 
+                    # Дополнительная модификация для экстремальных тактик
+                    if home_tactic == 'bus':
+                        home_win_prob *= 0.8  # Снижаем шансы на победу
+                    elif away_tactic == 'bus':
+                        home_win_prob *= 1.2  # Повышаем шансы на победу домашней команды
+
+                    if home_tactic == 'all_out_attack':
+                        home_win_prob *= 1.1  # Легко повышаем шансы на атакующей тактике
+                    elif away_tactic == 'all_out_attack':
+                        home_win_prob *= 0.9  # Снижаем шансы против атакующей тактики
+
+                    home_win_prob = max(0.1, min(0.9, home_win_prob))
+
                     if random.random() < home_win_prob:
                         # Выигрывает хозяин
-                        home_score = random.randint(1, 3)
-                        away_score = random.randint(0, home_score - 1)
+                        base_home_score = random.randint(1, 3)
+                        base_away_score = random.randint(0, base_home_score - 1)
+
+                        # Применяем тактические модификаторы
+                        home_score = int(base_home_score * home_attack_weight)
+                        away_score = int(base_away_score * away_attack_weight)
+
+                        # Минимум 1 гол для победителя
+                        home_score = max(1, home_score)
+                        away_score = max(0, away_score)
+
                     else:
                         # Выигрывает гость или ничья
                         if random.random() < 0.6:  # 60% шанс на победу гостя
-                            away_score = random.randint(1, 3)
-                            home_score = random.randint(0, away_score - 1)
+                            base_away_score = random.randint(1, 3)
+                            base_home_score = random.randint(0, base_away_score - 1)
+
+                            # Применяем тактические модификаторы
+                            away_score = int(base_away_score * away_attack_weight)
+                            home_score = int(base_home_score * home_attack_weight)
+
+                            # Минимум 1 гол для победителя
+                            away_score = max(1, away_score)
+                            home_score = max(0, home_score)
                         else:  # Ничья
-                            home_score = random.randint(0, 2)
-                            away_score = random.randint(max(0, home_score - 1), home_score + 1)
+                            base_home_score = random.randint(0, 2)
+                            base_away_score = random.randint(max(0, base_home_score - 1), base_home_score + 1)
+
+                            # Применяем тактические модификаторы для ничьи
+                            home_score = int(base_home_score * home_attack_weight * 0.8)  # Немного меньше для ничьи
+                            away_score = int(base_away_score * away_attack_weight * 0.8)
+
+                            home_score = max(0, home_score)
+                            away_score = max(0, away_score)
 
                     # Генерируем бомбардиров для матча
                     goals = []
@@ -1815,6 +1919,28 @@ def match_results():
 
     results = session['last_round_results']
     return render_template('match_results.html', results=results)
+
+@app.route('/change_tactic', methods=['POST'])
+def change_tactic():
+    if 'game_data' not in session:
+        return jsonify({"success": False, "message": "Игра не найдена"})
+
+    data = request.get_json()
+    tactic = data.get('tactic', 'balanced')
+
+    if tactic not in TACTICS:
+        return jsonify({"success": False, "message": "Неверная тактика"})
+
+    # Сохраняем выбранную тактику
+    game_data = session['game_data']
+    game_data['current_tactic'] = tactic
+    session['game_data'] = game_data
+
+    return jsonify({
+        "success": True,
+        "message": f"Тактика изменена на {TACTICS[tactic]['name']}",
+        "tactic": TACTICS[tactic]
+    })
 
 @app.route('/top_scorers')
 def top_scorers():

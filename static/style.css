@@ -2005,3 +2005,71 @@ body::before {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--border-light);
 }
+
+/* Тактики */
+.tactic-section {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.tactic-section h2 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.current-tactic {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+}
+
+.tactic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.tactic-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.tactic-card.active {
+    border-color: var(--accent-yellow);
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.tactic-card:hover {
+    border-color: var(--accent-yellow);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tactic-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.tactic-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.select-tactic-btn {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
