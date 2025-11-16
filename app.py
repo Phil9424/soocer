@@ -3,7 +3,9 @@ import json
 import os
 from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(__name__,
+            static_folder='static',
+            static_url_path='/static')
 app.secret_key = 'football_manager_secret_key_2024'
 
 # Простые данные для тестирования
@@ -29,6 +31,14 @@ def index():
 @app.route('/new_game')
 def new_game():
     return render_template('select_team.html', teams=TEAMS, preselected_team='')
+
+@app.route('/load_game')
+def load_game():
+    return render_template('load_game.html', saves=[], is_vercel=True)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 @app.route('/match')
 def match():
