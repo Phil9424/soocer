@@ -1703,7 +1703,7 @@ def match_action():
                     home_rating = get_team_average_rating(home)
                     away_rating = get_team_average_rating(away)
 
-                    # Для нашего матча используем выбранную тактику, для других - случайную
+                    # Для нашего матча используем выбранную тактику, для других - реалистичное распределение
                     home_tactic = 'balanced'  # По умолчанию нейтральная
                     away_tactic = 'balanced'  # По умолчанию нейтральная
 
@@ -1713,12 +1713,66 @@ def match_action():
                     elif away == match_data['my_team']:
                         away_tactic = game_data.get('current_tactic', 'balanced')
 
-                    # Для других матчей случайная тактика с небольшим уклоном к нейтральной
+                    # Для других матчей реалистичное распределение тактик
                     if home != match_data['my_team'] and away != match_data['my_team']:
-                        # 40% нейтральная, остальные тактики равномерно
-                        tactic_options = ['balanced'] * 4 + list(TACTICS.keys())
-                        home_tactic = random.choice(tactic_options)
-                        away_tactic = random.choice(tactic_options)
+                        # Реалистичное распределение тактик в футболе:
+                        # Нейтральная - самая распространенная (50%)
+                        # Автобус - часто используется слабыми командами (15%)
+                        # Все в атаку - агрессивные команды (15%)
+                        # Тики-така - команды с высоким владением (10%)
+                        # Катеначчо - оборонительная тактика (10%)
+                        tactic_weights = {
+                            'balanced': 50,      # Нейтральная - самая популярная
+                            'bus': 15,           # Автобус - слабые команды
+                            'all_out_attack': 15, # Все в атаку - дерзкие команды
+                            'tiki_taka': 10,     # Тики-така - техничные команды
+                            'catenaccio': 10     # Катеначчо - оборонительные команды
+                        }
+
+                        # Выбираем тактику с учетом рейтинга команды
+                        home_rating = get_team_average_rating(home)
+                        away_rating = get_team_average_rating(away)
+
+                        # Слабые команды чаще используют автобус
+                        if home_rating < 70:
+                            tactic_weights['bus'] += 10
+                            tactic_weights['balanced'] -= 5
+                        # Средние команды чаще нейтральная
+                        elif home_rating < 80:
+                            pass  # оставляем как есть
+                        # Сильные команды чаще тiki-taka или атакующая
+                        else:
+                            tactic_weights['tiki_taka'] += 5
+                            tactic_weights['all_out_attack'] += 5
+                            tactic_weights['balanced'] -= 5
+
+                        # Аналогично для гостевой команды
+                        if away_rating < 70:
+                            tactic_weights['bus'] += 10
+                            tactic_weights['balanced'] -= 5
+                        elif away_rating >= 80:
+                            tactic_weights['tiki_taka'] += 5
+                            tactic_weights['all_out_attack'] += 5
+                            tactic_weights['balanced'] -= 5
+
+                        # Создаем список тактик с учетом весов
+                        tactic_pool = []
+                        for tactic, weight in tactic_weights.items():
+                            tactic_pool.extend([tactic] * weight)
+
+                        home_tactic = random.choice(tactic_pool)
+
+                        # Для гостевой команды немного другие предпочтения
+                        # Гости чаще играют осторожнее
+                        away_tactic_weights = tactic_weights.copy()
+                        away_tactic_weights['bus'] += 5  # Гости чаще обороняются
+                        away_tactic_weights['all_out_attack'] -= 5  # Реже атакуют
+
+                        away_tactic_pool = []
+                        for tactic, weight in away_tactic_weights.items():
+                            away_tactic_pool.extend([tactic] * max(1, weight))
+
+                        away_tactic = random.choice(away_tactic_pool)
 
                     # Применяем влияние тактики на вероятности
                     home_attack_weight = TACTICS[home_tactic]['attack_weight']
@@ -1748,42 +1802,65 @@ def match_action():
 
                     home_win_prob = max(0.1, min(0.9, home_win_prob))
 
+                    # Добавляем больше вариативности в счета
+                    rating_diff = abs(home_rating - away_rating)
+                    score_variability = min(2, rating_diff / 10)  # Чем больше разница в классе, тем меньше вариативности
+
                     if random.random() < home_win_prob:
                         # Выигрывает хозяин
-                        base_home_score = random.randint(1, 3)
-                        base_away_score = random.randint(0, base_home_score - 1)
+                        if rating_diff > 20:  # Большая разница в классе
+                            base_home_score = random.randint(2, 4 + int(score_variability))
+                            base_away_score = random.randint(0, min(2, base_home_score - 1))
+                        elif rating_diff > 10:  # Средняя разница
+                            base_home_score = random.randint(1, 3 + int(score_variability))
+                            base_away_score = random.randint(0, base_home_score)
+                        else:  # Равные команды
+                            base_home_score = random.randint(1, 3)
+                            base_away_score = random.randint(0, base_home_score)
 
                         # Применяем тактические модификаторы
-                        home_score = int(base_home_score * home_attack_weight)
-                        away_score = int(base_away_score * away_attack_weight)
+                        home_score = int(base_home_score * home_attack_weight * (1 + random.uniform(-0.2, 0.2)))
+                        away_score = int(base_away_score * away_attack_weight * (1 + random.uniform(-0.3, 0.1)))
 
-                        # Минимум 1 гол для победителя
-                        home_score = max(1, home_score)
-                        away_score = max(0, away_score)
+                        # Минимум 1 гол для победителя, максимум разумные пределы
+                        home_score = max(1, min(home_score, 6))
+                        away_score = max(0, min(away_score, 4))
 
                     else:
                         # Выигрывает гость или ничья
                         if random.random() < 0.6:  # 60% шанс на победу гостя
-                            base_away_score = random.randint(1, 3)
-                            base_home_score = random.randint(0, base_away_score - 1)
+                            if rating_diff > 20:  # Большая разница в классе
+                                base_away_score = random.randint(2, 4 + int(score_variability))
+                                base_home_score = random.randint(0, min(2, base_away_score - 1))
+                            elif rating_diff > 10:  # Средняя разница
+                                base_away_score = random.randint(1, 3 + int(score_variability))
+                                base_home_score = random.randint(0, base_away_score)
+                            else:  # Равные команды
+                                base_away_score = random.randint(1, 3)
+                                base_home_score = random.randint(0, base_away_score)
 
                             # Применяем тактические модификаторы
-                            away_score = int(base_away_score * away_attack_weight)
-                            home_score = int(base_home_score * home_attack_weight)
+                            away_score = int(base_away_score * away_attack_weight * (1 + random.uniform(-0.2, 0.2)))
+                            home_score = int(base_home_score * home_attack_weight * (1 + random.uniform(-0.3, 0.1)))
 
-                            # Минимум 1 гол для победителя
-                            away_score = max(1, away_score)
-                            home_score = max(0, home_score)
+                            # Минимум 1 гол для победителя, максимум разумные пределы
+                            away_score = max(1, min(away_score, 6))
+                            home_score = max(0, min(home_score, 4))
                         else:  # Ничья
-                            base_home_score = random.randint(0, 2)
-                            base_away_score = random.randint(max(0, base_home_score - 1), base_home_score + 1)
+                            # Для ничьи генерируем более разнообразные счета
+                            if rating_diff > 20:  # Разные по классу команды
+                                base_home_score = random.randint(0, 2)
+                                base_away_score = random.randint(0, 2)
+                            else:  # Равные команды
+                                base_home_score = random.randint(0, 3)
+                                base_away_score = random.randint(0, 3)
 
                             # Применяем тактические модификаторы для ничьи
-                            home_score = int(base_home_score * home_attack_weight * 0.8)  # Немного меньше для ничьи
-                            away_score = int(base_away_score * away_attack_weight * 0.8)
+                            home_score = int(base_home_score * home_attack_weight * 0.7 * (1 + random.uniform(-0.4, 0.4)))
+                            away_score = int(base_away_score * away_attack_weight * 0.7 * (1 + random.uniform(-0.4, 0.4)))
 
-                            home_score = max(0, home_score)
-                            away_score = max(0, away_score)
+                            home_score = max(0, min(home_score, 4))
+                            away_score = max(0, min(away_score, 4))
 
                     # Генерируем бомбардиров для матча
                     goals = []
