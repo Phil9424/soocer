@@ -1519,39 +1519,485 @@ def match():
 
 @app.route('/match_action', methods=['POST'])
 def match_action():
-    # Временная заглушка для исправления синтаксических ошибок
-    try:
-        if 'game_data' not in session or 'match_data' not in session:
-            return jsonify({"success": False, "error": "Session not initialized"})
+        # Расширяем try блок на всю функцию для перехвата всех исключений
+        try:
+            # Проверяем наличие необходимых данных в сессии
+            if 'game_data' not in session or 'match_data' not in session:
+                return jsonify({"success": False, "error": "Session not initialized"})
 
-        data = request.get_json()
-        action = data.get('action', '')
+            import random
 
-        if action == 'tick':
-            # Возвращаем фиктивный ответ для тестирования
-            return jsonify({
-                "success": True,
-                "minute": 45,
-                "my_score": 1,
-                "opponent_score": 0,
-                "finished": False,
-                "events": [],
-                "stats": {"shots": 5, "shots_on_target": 3, "possession": 55, "xg": 1.2}
-            })
+            # Безопасно получаем JSON данные
+            try:
+                data = request.get_json()
+            except Exception as e:
+                return jsonify({"success": False, "error": f"Invalid JSON: {str(e)}"})
+
+            if not data:
+                return jsonify({"success": False, "error": "No data provided"})
+
+            action = data.get('action')
+            if not action:
+                return jsonify({"success": False, "error": "No action provided"})
+
+            match_data = session['match_data']
+            game_data = session['game_data']
+
+            if action == 'tick':
+                # Получаем составы команд (нужно для определения бомбардиров)
+                my_team = game_data['team_name']
+                opponent_team = game_data['next_opponent']
+
+                # Получаем состав пользователя
+                my_squad = game_data['squad']
+                selected_players = game_data.get('selected_players', [])
+
+                # Если выбрано меньше 11 игроков, добавляем случайных
+                if len(selected_players) < 11:
+                    available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
+                    needed = 11 - len(selected_players)
+                    selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
+
+                my_lineup = []
+                for player_name in selected_players[:11]:
+                    player_info = next((p for p in my_squad if p['name'] == player_name), None)
+                    if player_info:
+                        my_lineup.append(player_info)
+
+                # Генерируем состав соперника
+                opponent_squad = []
+                if opponent_team in SQUADS_2007_08:
+                    for player_data in SQUADS_2007_08[opponent_team]:
+                        if isinstance(player_data, tuple):
+                            player_name, rating = player_data
+                        else:
+                            player_name = player_data
+                            rating = 70
+                        opponent_squad.append({
+                            "name": player_name,
+                            "rating": rating
+                        })
+
+                # Формируем оптимальный состав: 1 GK + 4 DEF + 4 MID + 2 FWD = 11 игроков
+                opponent_lineup = create_optimal_lineup(opponent_squad, opponent_team)
+            # Обновление таймера
+            minute = data.get('minute', 0)
+            half = data.get('half', 1)
+        
+            match_data['minute'] = minute
+            match_data['half'] = half
+        
+            # Генерируем события (голы, статистика) - каждую секунду
+            # Владение - медленно меняется
+            if minute % 5 == 0:
+                match_data['possession_my'] = max(30, min(70, match_data['possession_my'] + random.randint(-2, 2)))
+                match_data['possession_opponent'] = 100 - match_data['possession_my']
+        
+            # Удары - случайно (увеличена вероятность)
+            if random.random() < 0.12:  # 12% вероятность каждую секунду
+                if random.random() < 0.5:
+                    match_data['shots_my'] += 1
+                    if random.random() < 0.5:  # 50% попаданий в створ
+                        match_data['shots_on_target_my'] += 1
+                        match_data['xg_my'] += round(random.uniform(0.08, 0.25), 2)
+                else:
+                    match_data['shots_opponent'] += 1
+                    if random.random() < 0.5:  # 50% попаданий в створ
+                        match_data['shots_on_target_opponent'] += 1
+                        match_data['xg_opponent'] += round(random.uniform(0.08, 0.25), 2)
+        
+            # Голы (вероятность зависит от xG и накопленного xG) - увеличена вероятность
+            goal_prob_my = min(0.08, match_data['xg_my'] * 0.4)  # Максимум 8% в секунду
+            if random.random() < goal_prob_my and match_data['xg_my'] > 0.15:  # Минимальный порог снижен до 0.15
+                match_data['my_score'] += 1
+                    scorer = select_goal_scorer(game_data, my_lineup, match_data['goals'])
+                    if not scorer or scorer == "":
+                        scorer = "Неизвестный игрок"  # Fallback
+                match_data['goals'].append({
+                    'team': match_data['my_team'],
+                    'scorer': scorer,
+                    'minute': minute
+                })
+                match_data['xg_my'] = 0.0  # Сбрасываем после гола
+        
+            goal_prob_opp = min(0.08, match_data['xg_opponent'] * 0.4)  # Максимум 8% в секунду
+            if random.random() < goal_prob_opp and match_data['xg_opponent'] > 0.15:  # Минимальный порог снижен до 0.15
+                match_data['opponent_score'] += 1
+                    scorer = select_opponent_goal_scorer(match_data['opponent_team'], opponent_lineup, match_data['goals'])
+                    if not scorer or scorer == "":
+                        scorer = "Неизвестный игрок"  # Fallback
+                match_data['goals'].append({
+                    'team': match_data['opponent_team'],
+                    'scorer': scorer,
+                    'minute': minute
+                })
+                match_data['xg_opponent'] = 0.0
+        
+                # Сохраняем обновленные данные матча в сессии
+                session['match_data'] = match_data
+                return jsonify({"success": True, "match_data": match_data})
+        
+        elif action == 'start_second_half':
+            match_data['half'] = 2
+            match_data['minute'] = 46
+                session['match_data'] = match_data
+                return jsonify({"success": True, "match_data": match_data})
+    
         elif action == 'end_match':
-            # Фиктивное завершение матча
-            return jsonify({
-                "success": True,
-                "season_end": False,
-                "next_opponent": "Manchester United",
-                "is_home_match": True,
-                "final_score": "2-1"
-            })
+            # Сохраняем результаты всего тура
+            if 'match_results' not in session:
+                session['match_results'] = []
 
-        return jsonify({"success": False, "error": "Unknown action"})
+            current_round = game_data.get('current_round', 1)
+            round_results = []
 
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+            # Добавляем результат нашего матча
+            my_result = {
+                'home_team': match_data['my_team'],
+                'away_team': match_data['opponent_team'],
+                'home_score': match_data['my_score'],
+                'away_score': match_data['opponent_score'],
+                    'goals': match_data['goals'],
+                'is_user_match': True
+            }
+            round_results.append(my_result)
+
+            # Генерируем результаты остальных матчей тура
+            active_schedule = session.get('custom_schedule', MATCH_SCHEDULE)
+            if current_round <= len(active_schedule):
+                round_matches = active_schedule[current_round - 1]
+                for home, away in round_matches:
+                    # Пропускаем наш матч, он уже добавлен
+                    if (home == match_data['my_team'] and away == match_data['opponent_team']) or \
+                       (away == match_data['my_team'] and home == match_data['opponent_team']):
+                        continue
+
+                        # Создаем составы команд для более точного расчета силы
+                        home_squad = []
+                        away_squad = []
+                        if home in SQUADS_2007_08:
+                            for player_data in SQUADS_2007_08[home]:
+                                if isinstance(player_data, tuple):
+                                    player_name, rating = player_data
+                                else:
+                                    player_name = player_data
+                                    rating = 70
+                                home_squad.append({"name": player_name, "rating": rating})
+
+                        if away in SQUADS_2007_08:
+                            for player_data in SQUADS_2007_08[away]:
+                                if isinstance(player_data, tuple):
+                                    player_name, rating = player_data
+                                else:
+                                    player_name = player_data
+                                    rating = 70
+                                away_squad.append({"name": player_name, "rating": rating})
+
+                        # Создаем оптимальные составы
+                        home_lineup = create_optimal_lineup(home_squad, home)
+                        away_lineup = create_optimal_lineup(away_squad, away)
+
+                        # Вычисляем силу составов
+                        home_strength = calculate_lineup_strength(home_lineup)
+                        away_strength = calculate_lineup_strength(away_lineup)
+
+                        # Домашнее преимущество (+5% к силе хозяев)
+                        home_advantage = 1.05
+                        home_effective_strength = home_strength * home_advantage
+                        away_effective_strength = away_strength
+
+                        # Случайные факторы (форма команды ±10%)
+                        home_form = random.uniform(0.9, 1.1)
+                        away_form = random.uniform(0.9, 1.1)
+
+                        home_final_strength = home_effective_strength * home_form
+                        away_final_strength = away_effective_strength * away_form
+
+                        # Для нашего матча используем выбранную тактику, для других - реалистичное распределение
+                        home_tactic = 'balanced'  # По умолчанию нейтральная
+                        away_tactic = 'balanced'  # По умолчанию нейтральная
+
+                        # Если это наш матч, используем выбранную тактику
+                        if home == match_data['my_team']:
+                            home_tactic = game_data.get('current_tactic', 'balanced')
+                        elif away == match_data['my_team']:
+                            away_tactic = game_data.get('current_tactic', 'balanced')
+
+                        # Для других матчей реалистичное распределение тактик
+                        if home != match_data['my_team'] and away != match_data['my_team']:
+                            # Реалистичное распределение тактик в футболе:
+                            # Нейтральная - самая распространенная (50%)
+                            # Автобус - часто используется слабыми командами (15%)
+                            # Все в атаку - агрессивные команды (15%)
+                            # Тики-така - команды с высоким владением (10%)
+                            # Катеначчо - оборонительная тактика (10%)
+                            tactic_weights = {
+                                'balanced': 50,      # Нейтральная - самая популярная
+                                'bus': 15,           # Автобус - слабые команды
+                                'all_out_attack': 15, # Все в атаку - дерзкие команды
+                                'tiki_taka': 10,     # Тики-така - техничные команды
+                                'catenaccio': 10     # Катеначчо - оборонительные команды
+                            }
+
+                            # Выбираем тактику с учетом силы состава
+                            if home_strength < 75:
+                                tactic_weights['bus'] += 10
+                                tactic_weights['balanced'] -= 5
+                            elif home_strength >= 82:
+                                tactic_weights['tiki_taka'] += 5
+                                tactic_weights['all_out_attack'] += 5
+                                tactic_weights['balanced'] -= 5
+
+                            if away_strength < 75:
+                                tactic_weights['bus'] += 10
+                                tactic_weights['balanced'] -= 5
+                            elif away_strength >= 82:
+                                tactic_weights['tiki_taka'] += 5
+                                tactic_weights['all_out_attack'] += 5
+                                tactic_weights['balanced'] -= 5
+
+                            # Создаем список тактик с учетом весов
+                            tactic_pool = []
+                            for tactic, weight in tactic_weights.items():
+                                tactic_pool.extend([tactic] * max(1, weight))
+
+                            home_tactic = random.choice(tactic_pool)
+
+                            # Для гостевой команды немного другие предпочтения
+                            away_tactic_weights = tactic_weights.copy()
+                            away_tactic_weights['bus'] += 5  # Гости чаще обороняются
+                            away_tactic_weights['all_out_attack'] -= 5  # Реже атакуют
+
+                            away_tactic_pool = []
+                            for tactic, weight in away_tactic_weights.items():
+                                away_tactic_pool.extend([tactic] * max(1, weight))
+
+                            away_tactic = random.choice(away_tactic_pool)
+
+                        # Применяем влияние тактики на силу команд
+                        home_attack_weight = TACTICS[home_tactic]['attack_weight']
+                        home_defense_weight = TACTICS[home_tactic]['defense_weight']
+                        away_attack_weight = TACTICS[away_tactic]['attack_weight']
+                        away_defense_weight = TACTICS[away_tactic]['defense_weight']
+
+                        # Модифицируем силу команд в зависимости от тактики
+                        home_tactical_strength = home_final_strength * (home_attack_weight * 0.6 + home_defense_weight * 0.4)
+                        away_tactical_strength = away_final_strength * (away_attack_weight * 0.6 + away_defense_weight * 0.4)
+
+                        # Вероятность победы зависит от разницы сил
+                        strength_diff = home_tactical_strength - away_tactical_strength
+                        home_win_prob = 0.5 + (strength_diff / 15)  # Максимум ±0.33 от 0.5
+                        home_win_prob = max(0.15, min(0.85, home_win_prob))
+
+                        # Дополнительная модификация для экстремальных тактик
+                        if home_tactic == 'bus':
+                            home_win_prob *= 0.85  # Снижаем шансы на победу
+                        elif away_tactic == 'bus':
+                            home_win_prob *= 1.15  # Повышаем шансы на победу домашней команды
+
+                        if home_tactic == 'all_out_attack':
+                            home_win_prob *= 1.08  # Легко повышаем шансы на атакующей тактике
+                        elif away_tactic == 'all_out_attack':
+                            home_win_prob *= 0.92  # Снижаем шансы против атакующей тактики
+
+                        home_win_prob = max(0.08, min(0.92, home_win_prob))
+
+                        # Добавляем больше вариативности в счета
+                        strength_diff_abs = abs(home_tactical_strength - away_tactical_strength)
+                        score_variability = min(3, strength_diff_abs / 8)  # Чем больше разница в силе, тем меньше вариативности
+
+                    if random.random() < home_win_prob:
+                        # Выигрывает хозяин
+                            if strength_diff_abs > 15:  # Большая разница в силе
+                                base_home_score = random.randint(2, 5 + int(score_variability))
+                                base_away_score = random.randint(0, min(3, base_home_score - 1))
+                            elif strength_diff_abs > 8:  # Средняя разница
+                                base_home_score = random.randint(1, 4 + int(score_variability))
+                                base_away_score = random.randint(0, base_home_score)
+                            else:  # Равные по силе команды
+                                base_home_score = random.randint(1, 4)
+                                base_away_score = random.randint(0, base_home_score)
+
+                            # Применяем тактические модификаторы и случайность
+                            home_score = int(base_home_score * home_attack_weight * (1 + random.uniform(-0.15, 0.25)))
+                            away_score = int(base_away_score * away_attack_weight * (1 + random.uniform(-0.25, 0.15)))
+
+                            # Минимум 1 гол для победителя, максимум разумные пределы
+                            home_score = max(1, min(home_score, 8))
+                            away_score = max(0, min(away_score, 5))
+
+                    else:
+                        # Выигрывает гость или ничья
+                            if random.random() < 0.55:  # 55% шанс на победу гостя (немного меньше из-за преимущества дома)
+                                if strength_diff_abs > 15:  # Большая разница в силе
+                                    base_away_score = random.randint(2, 5 + int(score_variability))
+                                    base_home_score = random.randint(0, min(3, base_away_score - 1))
+                                elif strength_diff_abs > 8:  # Средняя разница
+                                    base_away_score = random.randint(1, 4 + int(score_variability))
+                                    base_home_score = random.randint(0, base_away_score)
+                                else:  # Равные по силе команды
+                                    base_away_score = random.randint(1, 4)
+                                    base_home_score = random.randint(0, base_away_score)
+
+                                # Применяем тактические модификаторы и случайность
+                                away_score = int(base_away_score * away_attack_weight * (1 + random.uniform(-0.15, 0.25)))
+                                home_score = int(base_home_score * home_attack_weight * (1 + random.uniform(-0.25, 0.15)))
+
+                                # Минимум 1 гол для победителя, максимум разумные пределы
+                                away_score = max(1, min(away_score, 8))
+                                home_score = max(0, min(home_score, 5))
+                            else:  # Ничья - более частый исход для равных команд
+                                # Для ничьи генерируем разнообразные счета
+                                if strength_diff_abs > 15:  # Разные по силе команды
+                                    base_home_score = random.randint(0, 3)
+                                    base_away_score = random.randint(0, 3)
+                                elif strength_diff_abs > 8:  # Средняя разница
+                                    base_home_score = random.randint(0, 4)
+                                    base_away_score = random.randint(0, 4)
+                                else:  # Равные команды - самые разнообразные счета
+                                    base_home_score = random.randint(0, 5)
+                                    base_away_score = random.randint(0, 5)
+
+                                # Применяем тактические модификаторы для ничьи (меньше влияния)
+                                home_score = int(base_home_score * home_attack_weight * 0.8 * (1 + random.uniform(-0.3, 0.3)))
+                                away_score = int(base_away_score * away_attack_weight * 0.8 * (1 + random.uniform(-0.3, 0.3)))
+
+                                home_score = max(0, min(home_score, 6))
+                                away_score = max(0, min(away_score, 6))
+
+                                # Для ничьи иногда делаем более крупные счета
+                                if random.random() < 0.15:  # 15% шанс на результативную ничью
+                                    bonus = random.randint(1, 2)
+                                    home_score = min(home_score + bonus, 6)
+                                    away_score = min(away_score + bonus, 6)
+
+                        # Генерируем бомбардиров для матча
+                        goals = []
+                        home_goals_left = home_score
+                        away_goals_left = away_score
+
+                        # Получаем составы команд для генерации бомбардиров
+                        home_squad = []
+                        away_squad = []
+                        if home in SQUADS_2007_08:
+                            for player_data in SQUADS_2007_08[home]:
+                                if isinstance(player_data, tuple):
+                                    home_squad.append({"name": player_data[0], "rating": player_data[1]})
+                                else:
+                                    home_squad.append({"name": player_data, "rating": 70})
+                            # Сортируем состав по позициям
+                            home_squad = sort_squad_by_positions(home_squad, home)
+                        if away in SQUADS_2007_08:
+                            for player_data in SQUADS_2007_08[away]:
+                                if isinstance(player_data, tuple):
+                                    away_squad.append({"name": player_data[0], "rating": player_data[1]})
+                                else:
+                                    away_squad.append({"name": player_data, "rating": 70})
+                            # Сортируем состав по позициям
+                            away_squad = sort_squad_by_positions(away_squad, away)
+
+                        # Генерируем голы для домашней команды
+                        for _ in range(home_goals_left):
+                            if home_squad:
+                                scorer = select_goal_scorer({"team_name": home}, home_squad, goals)
+                                goals.append({
+                                    'team': home,
+                                    'scorer': scorer,
+                                    'minute': random.randint(1, 90)
+                                })
+
+                        # Генерируем голы для гостевой команды
+                        for _ in range(away_goals_left):
+                            if away_squad:
+                                scorer = select_opponent_goal_scorer(away, away_squad, goals)
+                                goals.append({
+                                    'team': away,
+                                    'scorer': scorer,
+                                    'minute': random.randint(1, 90)
+                                })
+
+                    round_results.append({
+                        'home_team': home,
+                        'away_team': away,
+                        'home_score': home_score,
+                        'away_score': away_score,
+                            'goals': goals,
+                        'is_user_match': False
+                    })
+
+                # Сохраняем результаты текущего тура отдельно для таблицы итогов
+                session['last_round_results'] = round_results
+
+                # Добавляем результаты текущего тура к накопительной статистике для бомбардиров
+                if 'match_results' not in session:
+                    session['match_results'] = []
+                session['match_results'].extend(round_results)
+
+            # Обновляем турнирную таблицу
+            update_league_table(round_results)
+
+            # Увеличиваем тур для следующего матча
+                new_round = current_round + 1
+                session['current_round'] = new_round
+                game_data['current_round'] = new_round
+
+                # Определяем следующего соперника для нового тура
+                active_schedule = session.get('custom_schedule', MATCH_SCHEDULE)
+                next_opponent = None
+                next_is_home_match = True
+                if new_round <= len(active_schedule):
+                    round_matches = active_schedule[new_round - 1]
+                    my_team = game_data['team_name']
+                    for home, away in round_matches:
+                        if home == my_team:
+                            next_opponent = away
+                            next_is_home_match = True
+                            break
+                        elif away == my_team:
+                            next_opponent = home
+                            next_is_home_match = False
+                            break
+
+                # Если матчи закончились, следующий соперник будет определен при сбросе сезона
+                if next_opponent:
+                    game_data['next_opponent'] = next_opponent
+                    game_data['is_home_match'] = next_is_home_match
+
+                # Проверяем, был ли это последний тур чемпионата
+                is_season_end = (new_round > 38)
+
+            # Очищаем данные матча
+            session.pop('match_data', None)
+    
+                # Если это был последний тур, получаем итоговую позицию команды
+                if is_season_end:
+                    final_position = None
+                    for team in game_data['table']:
+                        if team['team'] == game_data['team_name']:
+                            final_position = team['position']
+                            break
+                    session['season_end_data'] = {
+                        'final_position': final_position,
+                        'team_name': game_data['team_name']
+                    }
+    
+        session['match_data'] = match_data
+                response_data = {"success": True, "match_data": match_data}
+                if is_season_end:
+                    response_data["season_end"] = True
+                    response_data["season_end_data"] = session['season_end_data']
+                return jsonify(response_data)
+
+            else:
+                # Неизвестное действие
+                return jsonify({"success": False, "error": f"Unknown action: {action}"})
+
+        except Exception as e:
+            print(f"Error in match_action: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({"success": False, "error": str(e)})
+
 @app.route('/match_results')
 def match_results():
     if 'last_round_results' not in session:
