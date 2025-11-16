@@ -26,9 +26,18 @@ def get_player_position(team_name, player_index):
     return 'MID'  # По умолчанию
 
 # Функция для выбора бомбардира из состава пользователя
-def select_goal_scorer(game_data, lineup):
-    """Выбирает бомбардира с учетом позиций (вратари редко забивают)"""
+def select_goal_scorer(game_data, lineup, match_goals=None):
+    """Выбирает бомбардира с учетом позиций, рейтинга и предыдущих голов в матче для реализма"""
     import random
+
+    if match_goals is None:
+        match_goals = []
+
+    # Подсчитываем, сколько голов уже забил каждый игрок в этом матче
+    scorer_counts = {}
+    for goal in match_goals:
+        if goal['team'] == game_data['team_name']:
+            scorer_counts[goal['scorer']] = scorer_counts.get(goal['scorer'], 0) + 1
 
     # Создаем список игроков с весами
     scorers_with_weights = []
@@ -36,20 +45,47 @@ def select_goal_scorer(game_data, lineup):
     for i, player in enumerate(lineup):
         position = get_player_position(game_data['team_name'], i)
         name = player['name']
+        rating = player.get('rating', 70)
 
-        # Веса по позициям (чем выше, тем чаще забивает)
+        # Базовые веса по позициям
         if position == 'GK':
-            weight = 1  # Вратари забивают очень редко (1 на 1000 матчей)
+            base_weight = 1  # Вратари забивают очень редко
         elif position == 'DEF':
-            weight = 3  # Защитники забивают реже
+            base_weight = 3  # Защитники забивают реже
         elif position == 'MID':
-            weight = 5  # Полузащитники забивают чаще
+            base_weight = 5  # Полузащитники забивают чаще
         elif position == 'FWD':
-            weight = 7  # Нападающие забивают чаще всего
+            base_weight = 8  # Нападающие забивают чаще всего
         else:
-            weight = 4  # По умолчанию
+            base_weight = 4  # По умолчанию
 
-        scorers_with_weights.extend([name] * weight)
+        # Умножаем на рейтинг игрока (нормализуем к разумным значениям)
+        # Рейтинг 60 = вес 0.8, рейтинг 90 = вес 1.4, рейтинг 99 = вес 1.6
+        rating_multiplier = 0.8 + (rating - 60) * 0.01
+        rating_multiplier = max(0.5, min(2.0, rating_multiplier))  # Ограничиваем диапазон
+
+        # Финальный вес = базовый вес × рейтинг × случайный фактор (для создания звезд)
+        final_weight = int(base_weight * rating_multiplier)
+
+        # БОНУС: если игрок уже забивал в этом матче, его шансы увеличиваются!
+        goals_in_match = scorer_counts.get(name, 0)
+        if goals_in_match >= 1:
+            # После первого гола шанс забить еще увеличивается
+            final_weight = int(final_weight * (1.5 + goals_in_match * 0.3))
+        elif goals_in_match >= 2:
+            # После второго гола шанс еще больше (хет-трик!)
+            final_weight = int(final_weight * (2.0 + goals_in_match * 0.5))
+
+        # Добавляем элемент удачи - некоторые игроки "горячие" в данный момент
+        luck_factor = random.random()
+        if luck_factor > 0.85:  # 15% игроков имеют повышенный шанс
+            final_weight = int(final_weight * 1.5)
+        elif luck_factor < 0.05:  # 5% игроков имеют пониженный шанс
+            final_weight = max(1, int(final_weight * 0.5))
+
+        final_weight = max(1, final_weight)  # Минимум 1
+
+        scorers_with_weights.extend([name] * final_weight)
 
     if scorers_with_weights:
         return random.choice(scorers_with_weights)
@@ -57,9 +93,18 @@ def select_goal_scorer(game_data, lineup):
         return random.choice([p['name'] for p in lineup])
 
 # Функция для выбора бомбардира соперника
-def select_opponent_goal_scorer(team_name, lineup):
-    """Выбирает бомбардира соперника с учетом позиций"""
+def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
+    """Выбирает бомбардира соперника с учетом позиций, рейтинга и предыдущих голов в матче для реализма"""
     import random
+
+    if match_goals is None:
+        match_goals = []
+
+    # Подсчитываем, сколько голов уже забил каждый игрок в этом матче
+    scorer_counts = {}
+    for goal in match_goals:
+        if goal['team'] == team_name:
+            scorer_counts[goal['scorer']] = scorer_counts.get(goal['scorer'], 0) + 1
 
     # Создаем список игроков с весами
     scorers_with_weights = []
@@ -67,20 +112,47 @@ def select_opponent_goal_scorer(team_name, lineup):
     for i, player in enumerate(lineup):
         position = get_player_position(team_name, i)
         name = player['name']
+        rating = player.get('rating', 70)
 
-        # Веса по позициям (чем выше, тем чаще забивает)
+        # Базовые веса по позициям
         if position == 'GK':
-            weight = 1  # Вратари забивают очень редко
+            base_weight = 1  # Вратари забивают очень редко
         elif position == 'DEF':
-            weight = 3  # Защитники забивают реже
+            base_weight = 3  # Защитники забивают реже
         elif position == 'MID':
-            weight = 5  # Полузащитники забивают чаще
+            base_weight = 5  # Полузащитники забивают чаще
         elif position == 'FWD':
-            weight = 7  # Нападающие забивают чаще всего
+            base_weight = 8  # Нападающие забивают чаще всего
         else:
-            weight = 4  # По умолчанию
+            base_weight = 4  # По умолчанию
 
-        scorers_with_weights.extend([name] * weight)
+        # Умножаем на рейтинг игрока (нормализуем к разумным значениям)
+        # Рейтинг 60 = вес 0.8, рейтинг 90 = вес 1.4, рейтинг 99 = вес 1.6
+        rating_multiplier = 0.8 + (rating - 60) * 0.01
+        rating_multiplier = max(0.5, min(2.0, rating_multiplier))  # Ограничиваем диапазон
+
+        # Финальный вес = базовый вес × рейтинг × случайный фактор (для создания звезд)
+        final_weight = int(base_weight * rating_multiplier)
+
+        # БОНУС: если игрок уже забивал в этом матче, его шансы увеличиваются!
+        goals_in_match = scorer_counts.get(name, 0)
+        if goals_in_match >= 1:
+            # После первого гола шанс забить еще увеличивается
+            final_weight = int(final_weight * (1.5 + goals_in_match * 0.3))
+        elif goals_in_match >= 2:
+            # После второго гола шанс еще больше (хет-трик!)
+            final_weight = int(final_weight * (2.0 + goals_in_match * 0.5))
+
+        # Добавляем элемент удачи - некоторые игроки "горячие" в данный момент
+        luck_factor = random.random()
+        if luck_factor > 0.85:  # 15% игроков имеют повышенный шанс
+            final_weight = int(final_weight * 1.5)
+        elif luck_factor < 0.05:  # 5% игроков имеют пониженный шанс
+            final_weight = max(1, int(final_weight * 0.5))
+
+        final_weight = max(1, final_weight)  # Минимум 1
+
+        scorers_with_weights.extend([name] * final_weight)
 
     if scorers_with_weights:
         return random.choice(scorers_with_weights)
@@ -1255,7 +1327,7 @@ def match_action():
             goal_prob_my = min(0.08, match_data['xg_my'] * 0.4)  # Максимум 8% в секунду
             if random.random() < goal_prob_my and match_data['xg_my'] > 0.15:  # Минимальный порог снижен до 0.15
                 match_data['my_score'] += 1
-                scorer = select_goal_scorer(game_data, my_lineup)
+                scorer = select_goal_scorer(game_data, my_lineup, match_data['goals'])
                 if not scorer or scorer == "":
                     scorer = "Неизвестный игрок"  # Fallback
                 match_data['goals'].append({
@@ -1268,7 +1340,7 @@ def match_action():
             goal_prob_opp = min(0.08, match_data['xg_opponent'] * 0.4)  # Максимум 8% в секунду
             if random.random() < goal_prob_opp and match_data['xg_opponent'] > 0.15:  # Минимальный порог снижен до 0.15
                 match_data['opponent_score'] += 1
-                scorer = select_opponent_goal_scorer(match_data['opponent_team'], opponent_lineup)
+                scorer = select_opponent_goal_scorer(match_data['opponent_team'], opponent_lineup, match_data['goals'])
                 if not scorer or scorer == "":
                     scorer = "Неизвестный игрок"  # Fallback
                 match_data['goals'].append({
