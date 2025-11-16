@@ -5,13 +5,7 @@
     <div class="game-page">
         <div class="team-header">
             <h1>📊 Турнирная таблица - {{ data.division }}</h1>
-            {% set has_games = false %}
-            {% for team in data.table %}
-                {% if team.played > 0 %}
-                    {% set has_games = true %}
-                {% endif %}
-            {% endfor %}
-            {% if has_games %}
+            {% if data.current_round > 1 %}
             <div class="page-actions">
                 <a href="{{ url_for('top_scorers') }}" class="btn btn-secondary" style="font-size: 0.9rem; padding: 0.6rem 1rem;">
                     🏆 Бомбардиры
