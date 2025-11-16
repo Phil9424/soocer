@@ -735,6 +735,7 @@ def start_game():
     # Очищаем старые данные тура для новой игры
     session.pop('current_round', None)
     session.pop('custom_schedule', None)
+    session.pop('match_results', None)  # Очищаем результаты предыдущих матчей
 
     game_data = generate_game_data(team_name)
     session['game_data'] = game_data
@@ -1435,7 +1436,7 @@ def match_action():
                     # Генерируем голы для домашней команды
                     for _ in range(home_goals_left):
                         if home_squad:
-                            scorer = select_goal_scorer({"team_name": home}, home_squad)
+                            scorer = select_goal_scorer({"team_name": home}, home_squad, goals)
                             goals.append({
                                 'team': home,
                                 'scorer': scorer,
@@ -1445,7 +1446,7 @@ def match_action():
                     # Генерируем голы для гостевой команды
                     for _ in range(away_goals_left):
                         if away_squad:
-                            scorer = select_opponent_goal_scorer(away, away_squad)
+                            scorer = select_opponent_goal_scorer(away, away_squad, goals)
                             goals.append({
                                 'team': away,
                                 'scorer': scorer,
@@ -1461,7 +1462,11 @@ def match_action():
                         'is_user_match': False
                     })
 
-            session['match_results'] = round_results
+            # Добавляем результаты текущего тура к существующим (не перезаписываем)
+            if 'match_results' not in session:
+                session['match_results'] = []
+            session['match_results'].extend(round_results)
+            print(f"DEBUG: Added {len(round_results)} matches to match_results. Total: {len(session['match_results'])}")
 
             # Обновляем турнирную таблицу
             update_league_table(round_results)
@@ -1548,11 +1553,14 @@ def top_scorers():
 
     # Проверяем сохраненные результаты матчей
     if 'match_results' in session:
+        print(f"DEBUG top_scorers: Found {len(session['match_results'])} match results")
         for result in session['match_results']:
             if 'goals' in result:
+                print(f"DEBUG top_scorers: Match {result.get('home_team', 'Unknown')} vs {result.get('away_team', 'Unknown')} has {len(result['goals'])} goals")
                 for goal in result['goals']:
                     scorer_name = goal['scorer']
                     team_name = goal['team']
+                    print(f"DEBUG top_scorers: Goal by {scorer_name} ({team_name})")
 
                     if scorer_name not in scorers_stats:
                         scorers_stats[scorer_name] = {
@@ -1561,6 +1569,8 @@ def top_scorers():
                             'goals': 0
                         }
                     scorers_stats[scorer_name]['goals'] += 1
+    else:
+        print("DEBUG top_scorers: No match_results in session")
 
     # Преобразуем в список и сортируем по количеству голов
     scorers_list = list(scorers_stats.values())
