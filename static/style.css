@@ -594,6 +594,14 @@ body::before {
     text-align: center;
 }
 
+.player-real-position {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.6rem;
+    margin-left: 2px;
+    opacity: 0.8;
+}
+
 .player-name {
     font-weight: 500;
     color: var(--text-primary);
