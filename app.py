@@ -8,183 +8,15 @@ app.secret_key = 'football_manager_secret_key_2024'
 
 # Функция для определения позиции игрока
 def get_player_position(team_name, player_index):
-    """Определяет позицию игрока по его месту в составе с учетом реальных позиций"""
-    if team_name in SQUADS_2007_08:
-        squad = SQUADS_2007_08[team_name]
-
-        # Если индекс выходит за пределы, возвращаем по умолчанию
-        if player_index >= len(squad):
-            return 'MID'
-
-        player_data = squad[player_index]
-        player_name = player_data[0] if isinstance(player_data, tuple) else player_data
-
-        # Известные вратари (Только GK)
-        goalkeepers = [
-            "Manuel Almunia", "Jens Lehmann", "Scott Carson", "Stuart Taylor", "Maik Taylor", "Colin Doyle",
-            "Petr Cech", "Carlo Cudicini", "Paul Robinson", "Chris Kirkland", "Brad Friedel", "Thomas Sorensen",
-            "Jussi Jaaskelainen", "Ali Al Habsi", "Mark Schwarzer", "Robert Green", "Roy Carroll",
-            "Marton Fulop", "Boaz Myhill", "Luke Steele", "Heurelho Gomes", "Craig Gordon", "David James",
-            "Shay Given", "Steve Harper", "Joe Hart", "Ben Foster", "Wayne Hennessey"
-        ]
-
-        # Известные защитники (Только DEF)
-        defenders = [
-            # Arsenal
-            "Gael Clichy", "Kolo Toure", "William Gallas", "Philippe Senderos", "Bacary Sagna", "Emmanuel Eboue",
-            # Aston Villa
-            "Olof Mellberg", "Martin Laursen", "Zat Knight", "Curtis Davies", "Wilfred Bouma", "Nicky Shorey",
-            # Birmingham
-            "Stephen Kelly", "Liam Ridgewell", "Radhi Jaidi", "Martin Taylor", "Franck Queudrue", "Stuart Parnaby",
-            # Blackburn
-            "Andre Ooijer", "Christopher Samba", "Brett Emerton", "Stephen Warnock", "Ryan Nelsen", "Lucas Neill",
-            # Bolton
-            "Jlloyd Samuel", "Abdoulaye Meite", "Gricel Ndo", "Kevin Nolan", "Ivan Campo", "Abdoulaye Faye",
-            # Chelsea
-            "John Terry", "Paulo Ferreira", "Ashley Cole", "Wayne Bridge", "Juliano Belletti", "Ricardo Carvalho",
-            # Derby
-            "Darren Moore", "Claude Davis", "Dean Leacock", "Andy Todd", "Marc Edworthy", "Tyrone Mears",
-            # Everton
-            "Joseph Yobo", "Alan Stubbs", "David Weir", "Leighton Baines", "Joleon Lescott", "Tony Hibbert",
-            # Fulham
-            "Ian Pearce", "Brede Hangeland", "Paul Konchesky", "Carlos Bocanegra", "Dejan Stefanovic", "Liam Rosenior",
-            # Liverpool
-            "Jamie Carragher", "Daniel Agger", "Alvaro Arbeloa", "John Arne Riise", "Steve Finnan", "Fabio Aurelio",
-            # Man City
-            "Richard Dunne", "Sylvain Distin", "Michael Ball", "Javier Garrido", "Vedran Corluka", "Michael Johnson",
-            # Man Utd
-            "Rio Ferdinand", "Nemanja Vidic", "Patrice Evra", "Gary Neville", "Mikael Silvestre", "Wes Brown",
-            "John O'Shea", "Gerard Pique", "Rafael", "Fabio",
-            # Middlesbrough
-            "David Wheater", "Robert Huth", "Emanuel Pogatetz", "Jonathan Woodgate", "Luke Young", "Andrew Taylor",
-            # Newcastle
-            "Steve Harper", "Titus Bramble", "Emile Heskey", "Matthew Taylor", "Paul Stalteri", "Hayden Foxe",
-            # Portsmouth
-            "Sol Campbell", "Sylvain Distin", "Glen Johnson", "Hermann Hreidarsson", "Noe Pamarot", "Lassana Diarra",
-            # Reading
-            "Ibrahima Sonko", "Michael Duberry", "Nick Shorey", "Graeme Murty", "Liam Rosenior", "James Harper",
-            # Sunderland
-            "Paul McShane", "Danny Collins", "Dean Whitehead", "Ian Harte", "Nyron Nosworthy", "Anthony Stokes",
-            # Tottenham
-            "Ledley King", "Michael Dawson", "Younes Kaboul", "Gareth Bale", "Pascal Chimbonda", "Alan Hutton",
-            # West Ham
-            "Anton Ferdinand", "Matthew Upson", "Lucas Neill", "George McCartney", "Jonathan Spector", "Mark Noble",
-            # Wigan
-            "Emile Heskey", "Titus Bramble", "Kevin Kilbane", "Paul Stalteri", "Maynor Figueroa", "Leighton Baines"
-        ]
-
-        # Известные полузащитники (Только MID)
-        midfielders = [
-            # Arsenal
-            "Cesc Fabregas", "Gilberto Silva", "Tomas Rosicky", "Alexander Hleb", "Mathieu Flamini", "Denilson",
-            "Theo Walcott", "Abou Diaby", "Alexandre Song", "Justin Hoyte", "Armand Traore", "Lukasz Fabianski",
-            # Aston Villa
-            "Gareth Barry", "Nigel Reo-Coker", "Stiliyan Petrov", "Ashley Young", "Shaun Maloney", "Gabriel Agbonlahor",
-            # Birmingham
-            "Mehdi Nafti", "Fabrice Muamba", "Damien Johnson", "Sebastian Larsson", "Gary McSheffrey", "Olivier Kapo",
-            # Blackburn
-            "David Bentley", "Brett Emerton", "David Dunn", "Steven Reid", "Tugay Kerimoglu", "Paul Gallagher",
-            # Bolton
-            "Kevin Davies", "Ivan Campo", "Stelios Giannakopoulos", "Gary Speed", "Ricardo Gardner", "El Hadji Diouf",
-            # Chelsea
-            "Michael Essien", "Frank Lampard", "Claude Makelele", "Damien Duff", "Joe Cole", "Geremi",
-            "Shaun Wright-Phillips", "Steve Sidwell", "Michael Ballack", "Florent Malouda", "John Obi Mikel",
-            # Derby
-            "Matt Oakley", "Gary Teale", "Stephen Pearson", "Paul Thirlwell", "Michael Johnson", "Craig Fagan",
-            # Everton
-            "Miklos Feher", "Tim Cahill", "Phil Neville", "Leon Osman", "Kevin Kilbane", "Simon Davies",
-            # Fulham
-            "Michael Brown", "Steed Malbranque", "Jimmy Bullard", "Claus Jensen", "Brian McBride", "Collins John",
-            # Liverpool
-            "Steven Gerrard", "Xabi Alonso", "Javier Mascherano", "Lucas Leiva", "Yossi Benayoun", "Ryan Babel",
-            # Man City
-            "Stephen Ireland", "Elano", "Martin Petrov", "Darius Vassell", "Dietmar Hamann", "Gelson Fernandes",
-            # Man Utd
-            "Michael Carrick", "Paul Scholes", "Owen Hargreaves", "Anderson", "Ryan Giggs", "Ji-sung Park",
-            "Darren Fletcher", "Nani",
-            # Middlesbrough
-            "Stewart Downing", "Gary O'Neil", "Fabio Rochemback", "George Boateng", "Julio Arca", "Tuncay Sanli",
-            # Newcastle
-            "Kevin Nolan", "James Milner", "Charles N'Zogbia", "Nicky Butt", "Matthew Etherington", "Alan Smith",
-            # Portsmouth
-            "Papa Bouba Diop", "Sulley Muntari", "Niko Kranjcar", "John Utaka", "Pedro Mendes", "Richard Hughes",
-            # Reading
-            "Bobby Convey", "Stephen Hunt", "James Harper", "Leroy Lita", "John Oster", "Kevin Doyle",
-            # Sunderland
-            "Ross Wallace", "Grant Leadbitter", "Kenwyne Jones", "Carlos Edwards", "Andy Reid", "Rade Prica",
-            # Tottenham
-            "Jermaine Jenas", "Tom Huddlestone", "Didier Zokora", "Aaron Lennon", "Steed Malbranque", "Jamie O'Hara",
-            # West Ham
-            "Scott Parker", "Hayden Mullins", "Freddie Ljungberg", "Matthew Etherington", "Craig Bellamy", "Nolberto Solano",
-            # Wigan
-            "Paul Scharner", "Kevin Kilbane", "Jason Koumas", "Antonio Valencia", "Michael Brown", "David Cotterill"
-        ]
-
-        # Известные нападающие (Только FWD)
-        forwards = [
-            # Arsenal
-            "Robin van Persie", "Emmanuel Adebayor", "Nicklas Bendtner", "Eduardo",
-            # Aston Villa
-            "John Carew", "Luke Moore", "Gabriel Agbonlahor",
-            # Birmingham
-            "Cameron Jerome", "Mikael Forssell", "James McFadden", "Garry O'Connor", "Daniel de Ridder", "Rafael Schmitz",
-            # Blackburn
-            "Benni McCarthy", "Jason Roberts", "Matt Derbyshire", "Paul Dickov", "Francis Jeffers",
-            # Bolton
-            "Nicolas Anelka", "Kevin Davies", "Heidar Helguson", "Grzegorz Rasiak", "Nolberto Solano",
-            # Chelsea
-            "Didier Drogba", "Andriy Shevchenko", "Salomon Kalou",
-            # Derby
-            "Steve Howard", "Jon Stead", "Kenny Miller", "Gary Teale", "Artur Boruc",
-            # Everton
-            "Andrew Johnson", "James Vaughan", "Victor Anichebe", "James McFadden", "Yakubu Aiyegbeni",
-            # Fulham
-            "Brian McBride", "Heidar Helguson", "David Healy", "Collins John", "Diomansy Kamara",
-            # Liverpool
-            "Fernando Torres", "Peter Crouch", "Dirk Kuyt", "Craig Bellamy", "Andriy Voronin",
-            # Man City
-            "Valeri Bojinov", "Georgios Samaras", "Rolando Bianchi", "Felipe Caicedo", "Geovanni",
-            # Man Utd
-            "Cristiano Ronaldo", "Wayne Rooney", "Carlos Tevez", "Louis Saha", "Alan Smith", "Ole Gunnar Solskjaer",
-            # Middlesbrough
-            "Mark Viduka", "Afonso Alves", "Jeremie Aliadiere", "Dong-Gook Lee", "Tom Craddock",
-            # Newcastle
-            "Michael Owen", "Mark Viduka", "Alan Smith", "Shola Ameobi", "Obafemi Martins",
-            # Portsmouth
-            "Jermain Defoe", "Dave Nugent", "Benjani", "Nwankwo Kanu",
-            # Reading
-            "Shane Long", "Kevin Doyle", "Dave Kitson", "Leroy Lita",
-            # Sunderland
-            "Kenwyne Jones", "Daryl Murphy", "Grant Leadbitter", "Rade Prica", "Carlos Edwards",
-            # Tottenham
-            "Robbie Keane", "Dimitar Berbatov", "Darren Bent",
-            # West Ham
-            "Dean Ashton", "Carlton Cole", "Bobby Zamora",
-            # Wigan
-            "Emile Heskey", "Marcus Bent", "Henri Camara", "Julio Baptista"
-        ]
-
-        # Проверяем по имени
-        if player_name in goalkeepers:
-            return 'GK'
-        elif player_name in defenders:
-            return 'DEF'
-        elif player_name in midfielders:
-            return 'MID'
-        elif player_name in forwards:
-            return 'FWD'
-        else:
-            # Fallback на позицию по индексу для неизвестных игроков
-            # Fallback на позицию по индексу для неизвестных игроков
-        if player_index < 2:
-            return 'GK'
-            elif player_index < 8:
-            return 'DEF'
-            elif player_index < 14:
-            return 'MID'
-        else:
-            return 'FWD'
-    return 'MID'  # По умолчанию
+    """Определяет позицию игрока по индексу: GK (0-1), DEF (2-7), MID (8-13), FWD (14+)"""
+    if player_index < 2:
+        return 'GK'
+    elif player_index < 8:
+        return 'DEF'
+    elif player_index < 14:
+        return 'MID'
+    else:
+        return 'FWD'
 
 def sort_squad_by_positions(squad, team_name):
     """Сортирует состав команды по позициям: GK, DEF, MID, FWD"""
@@ -346,74 +178,74 @@ def select_goal_scorer(game_data, lineup, match_goals=None):
     import random
 
     if match_goals is None:
-        match_goals = []
+    match_goals = []
 
     # Подсчитываем, сколько голов уже забил каждый игрок в этом матче
     scorer_counts = {}
     for goal in match_goals:
-        if goal['team'] == game_data['team_name']:
-            scorer_counts[goal['scorer']] = scorer_counts.get(goal['scorer'], 0) + 1
+    if goal['team'] == game_data['team_name']:
+    scorer_counts[goal['scorer']] = scorer_counts.get(goal['scorer'], 0) + 1
 
     # Создаем список игроков с весами
     scorers_with_weights = []
 
     for i, player in enumerate(lineup):
-        position = get_player_position(game_data['team_name'], i)
-        name = player['name']
-        rating = player.get('rating', 70)
+    position = get_player_position(game_data['team_name'], i)
+    name = player['name']
+    rating = player.get('rating', 70)
 
-        # ВРАТАРИ НЕ МОГУТ ЗАБИВАТЬ ГОЛЫ!
-        if position == 'GK':
-            continue  # Пропускаем вратарей полностью
+    # ВРАТАРИ НЕ МОГУТ ЗАБИВАТЬ ГОЛЫ!
+    if position == 'GK':
+    continue  # Пропускаем вратарей полностью
 
-        # Базовые веса по позициям
-        if position == 'DEF':
-            base_weight = 3  # Защитники забивают реже
-        elif position == 'MID':
-            base_weight = 5  # Полузащитники забивают чаще
-        elif position == 'FWD':
-            base_weight = 8  # Нападающие забивают чаще всего
-        else:
-            base_weight = 4  # По умолчанию
+    # Базовые веса по позициям
+    if position == 'DEF':
+    base_weight = 3  # Защитники забивают реже
+    elif position == 'MID':
+    base_weight = 5  # Полузащитники забивают чаще
+    elif position == 'FWD':
+    base_weight = 8  # Нападающие забивают чаще всего
+    else:
+    base_weight = 4  # По умолчанию
 
-        # Умножаем на рейтинг игрока (нормализуем к разумным значениям)
-        # Рейтинг 60 = вес 0.8, рейтинг 90 = вес 1.4, рейтинг 99 = вес 1.6
-        rating_multiplier = 0.8 + (rating - 60) * 0.01
-        rating_multiplier = max(0.5, min(2.0, rating_multiplier))  # Ограничиваем диапазон
+    # Умножаем на рейтинг игрока (нормализуем к разумным значениям)
+    # Рейтинг 60 = вес 0.8, рейтинг 90 = вес 1.4, рейтинг 99 = вес 1.6
+    rating_multiplier = 0.8 + (rating - 60) * 0.01
+    rating_multiplier = max(0.5, min(2.0, rating_multiplier))  # Ограничиваем диапазон
 
-        # Финальный вес = базовый вес × рейтинг × случайный фактор (для создания звезд)
-        final_weight = int(base_weight * rating_multiplier)
+    # Финальный вес = базовый вес × рейтинг × случайный фактор (для создания звезд)
+    final_weight = int(base_weight * rating_multiplier)
 
-        # БОНУС: если игрок уже забивал в этом матче, его шансы увеличиваются!
-        goals_in_match = scorer_counts.get(name, 0)
-        if goals_in_match >= 1:
-            # После первого гола шанс забить еще увеличивается
-            final_weight = int(final_weight * (1.5 + goals_in_match * 0.3))
-        elif goals_in_match >= 2:
-            # После второго гола шанс еще больше (хет-трик!)
-            final_weight = int(final_weight * (2.0 + goals_in_match * 0.5))
+    # БОНУС: если игрок уже забивал в этом матче, его шансы увеличиваются!
+    goals_in_match = scorer_counts.get(name, 0)
+    if goals_in_match >= 1:
+    # После первого гола шанс забить еще увеличивается
+    final_weight = int(final_weight * (1.5 + goals_in_match * 0.3))
+    elif goals_in_match >= 2:
+    # После второго гола шанс еще больше (хет-трик!)
+    final_weight = int(final_weight * (2.0 + goals_in_match * 0.5))
 
-        # Добавляем элемент удачи - некоторые игроки "горячие" в данный момент
-        luck_factor = random.random()
-        if luck_factor > 0.85:  # 15% игроков имеют повышенный шанс
-            final_weight = int(final_weight * 1.5)
-        elif luck_factor < 0.05:  # 5% игроков имеют пониженный шанс
-            final_weight = max(1, int(final_weight * 0.5))
+    # Добавляем элемент удачи - некоторые игроки "горячие" в данный момент
+    luck_factor = random.random()
+    if luck_factor > 0.85:  # 15% игроков имеют повышенный шанс
+    final_weight = int(final_weight * 1.5)
+    elif luck_factor < 0.05:  # 5% игроков имеют пониженный шанс
+    final_weight = max(1, int(final_weight * 0.5))
 
-        final_weight = max(1, final_weight)  # Минимум 1
+    final_weight = max(1, final_weight)  # Минимум 1
 
-        scorers_with_weights.extend([name] * final_weight)
+    scorers_with_weights.extend([name] * final_weight)
 
     if scorers_with_weights:
-        return random.choice(scorers_with_weights)
+    return random.choice(scorers_with_weights)
     else:
-        # Если нет подходящих игроков, выбираем случайного полевого игрока
-        field_players = [p['name'] for i, p in enumerate(lineup)
-                        if get_player_position(game_data['team_name'], i) != 'GK']
-        if field_players:
-            return random.choice(field_players)
+    # Если нет подходящих игроков, выбираем случайного полевого игрока
+    field_players = [p['name'] for i, p in enumerate(lineup)
+    if get_player_position(game_data['team_name'], i) != 'GK']
+    if field_players:
+    return random.choice(field_players)
     else:
-        return random.choice([p['name'] for p in lineup])
+    return random.choice([p['name'] for p in lineup])
 
 # Функция для выбора бомбардира соперника
 def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
@@ -421,111 +253,111 @@ def select_opponent_goal_scorer(team_name, lineup, match_goals=None):
     import random
 
     if match_goals is None:
-        match_goals = []
+    match_goals = []
 
     # Подсчитываем, сколько голов уже забил каждый игрок в этом матче
     scorer_counts = {}
     for goal in match_goals:
-        if goal['team'] == team_name:
-            scorer_counts[goal['scorer']] = scorer_counts.get(goal['scorer'], 0) + 1
+    if goal['team'] == team_name:
+    scorer_counts[goal['scorer']] = scorer_counts.get(goal['scorer'], 0) + 1
 
     # Создаем список игроков с весами
     scorers_with_weights = []
 
     for i, player in enumerate(lineup):
-        position = get_player_position(team_name, i)
-        name = player['name']
-        rating = player.get('rating', 70)
+    position = get_player_position(team_name, i)
+    name = player['name']
+    rating = player.get('rating', 70)
 
-        # ВРАТАРИ НЕ МОГУТ ЗАБИВАТЬ ГОЛЫ!
-        if position == 'GK':
-            continue  # Пропускаем вратарей полностью
+    # ВРАТАРИ НЕ МОГУТ ЗАБИВАТЬ ГОЛЫ!
+    if position == 'GK':
+    continue  # Пропускаем вратарей полностью
 
-        # Базовые веса по позициям
-        if position == 'DEF':
-            base_weight = 3  # Защитники забивают реже
-        elif position == 'MID':
-            base_weight = 5  # Полузащитники забивают чаще
-        elif position == 'FWD':
-            base_weight = 8  # Нападающие забивают чаще всего
-        else:
-            base_weight = 4  # По умолчанию
+    # Базовые веса по позициям
+    if position == 'DEF':
+    base_weight = 3  # Защитники забивают реже
+    elif position == 'MID':
+    base_weight = 5  # Полузащитники забивают чаще
+    elif position == 'FWD':
+    base_weight = 8  # Нападающие забивают чаще всего
+    else:
+    base_weight = 4  # По умолчанию
 
-        # Умножаем на рейтинг игрока (нормализуем к разумным значениям)
-        # Рейтинг 60 = вес 0.8, рейтинг 90 = вес 1.4, рейтинг 99 = вес 1.6
-        rating_multiplier = 0.8 + (rating - 60) * 0.01
-        rating_multiplier = max(0.5, min(2.0, rating_multiplier))  # Ограничиваем диапазон
+    # Умножаем на рейтинг игрока (нормализуем к разумным значениям)
+    # Рейтинг 60 = вес 0.8, рейтинг 90 = вес 1.4, рейтинг 99 = вес 1.6
+    rating_multiplier = 0.8 + (rating - 60) * 0.01
+    rating_multiplier = max(0.5, min(2.0, rating_multiplier))  # Ограничиваем диапазон
 
-        # Финальный вес = базовый вес × рейтинг × случайный фактор (для создания звезд)
-        final_weight = int(base_weight * rating_multiplier)
+    # Финальный вес = базовый вес × рейтинг × случайный фактор (для создания звезд)
+    final_weight = int(base_weight * rating_multiplier)
 
-        # БОНУС: если игрок уже забивал в этом матче, его шансы увеличиваются!
-        goals_in_match = scorer_counts.get(name, 0)
-        if goals_in_match >= 1:
-            # После первого гола шанс забить еще увеличивается
-            final_weight = int(final_weight * (1.5 + goals_in_match * 0.3))
-        elif goals_in_match >= 2:
-            # После второго гола шанс еще больше (хет-трик!)
-            final_weight = int(final_weight * (2.0 + goals_in_match * 0.5))
+    # БОНУС: если игрок уже забивал в этом матче, его шансы увеличиваются!
+    goals_in_match = scorer_counts.get(name, 0)
+    if goals_in_match >= 1:
+    # После первого гола шанс забить еще увеличивается
+    final_weight = int(final_weight * (1.5 + goals_in_match * 0.3))
+    elif goals_in_match >= 2:
+    # После второго гола шанс еще больше (хет-трик!)
+    final_weight = int(final_weight * (2.0 + goals_in_match * 0.5))
 
-        # Добавляем элемент удачи - некоторые игроки "горячие" в данный момент
-        luck_factor = random.random()
-        if luck_factor > 0.85:  # 15% игроков имеют повышенный шанс
-            final_weight = int(final_weight * 1.5)
-        elif luck_factor < 0.05:  # 5% игроков имеют пониженный шанс
-            final_weight = max(1, int(final_weight * 0.5))
+    # Добавляем элемент удачи - некоторые игроки "горячие" в данный момент
+    luck_factor = random.random()
+    if luck_factor > 0.85:  # 15% игроков имеют повышенный шанс
+    final_weight = int(final_weight * 1.5)
+    elif luck_factor < 0.05:  # 5% игроков имеют пониженный шанс
+    final_weight = max(1, int(final_weight * 0.5))
 
-        final_weight = max(1, final_weight)  # Минимум 1
+    final_weight = max(1, final_weight)  # Минимум 1
 
-        scorers_with_weights.extend([name] * final_weight)
+    scorers_with_weights.extend([name] * final_weight)
 
     if scorers_with_weights:
-        return random.choice(scorers_with_weights)
+    return random.choice(scorers_with_weights)
     else:
-        # Если нет подходящих игроков, выбираем случайного полевого игрока
-        field_players = [p['name'] for i, p in enumerate(lineup)
-                        if get_player_position(team_name, i) != 'GK']
-        if field_players:
-            return random.choice(field_players)
+    # Если нет подходящих игроков, выбираем случайного полевого игрока
+    field_players = [p['name'] for i, p in enumerate(lineup)
+    if get_player_position(team_name, i) != 'GK']
+    if field_players:
+    return random.choice(field_players)
     else:
-        return random.choice([p['name'] for p in lineup])
+    return random.choice([p['name'] for p in lineup])
 
 # Тактики игры
-TACTICS = {
+    TACTICS = {
     'balanced': {
-        'name': 'Нейтральная игра',
-        'description': 'Сбалансированная тактика 50/50',
-        'attack_weight': 0.5,
-        'defense_weight': 0.5,
-        'possession_modifier': 1.0
+    'name': 'Нейтральная игра',
+    'description': 'Сбалансированная тактика 50/50',
+    'attack_weight': 0.5,
+    'defense_weight': 0.5,
+    'possession_modifier': 1.0
     },
     'tiki_taka': {
-        'name': 'Тики-така',
-        'description': 'Высокое владение мячом, спокойный футбол',
-        'attack_weight': 0.65,
-        'defense_weight': 0.35,
-        'possession_modifier': 1.3
+    'name': 'Тики-така',
+    'description': 'Высокое владение мячом, спокойный футбол',
+    'attack_weight': 0.65,
+    'defense_weight': 0.35,
+    'possession_modifier': 1.3
     },
     'catenaccio': {
-        'name': 'Катеначчо',
-        'description': 'Атака после гола, затем оборона',
-        'attack_weight': 0.2,
-        'defense_weight': 0.8,
-        'possession_modifier': 0.8
+    'name': 'Катеначчо',
+    'description': 'Атака после гола, затем оборона',
+    'attack_weight': 0.2,
+    'defense_weight': 0.8,
+    'possession_modifier': 0.8
     },
     'bus': {
-        'name': 'Автобус',
-        'description': 'Глухая оборона',
-        'attack_weight': 0.05,
-        'defense_weight': 0.95,
-        'possession_modifier': 0.6
+    'name': 'Автобус',
+    'description': 'Глухая оборона',
+    'attack_weight': 0.05,
+    'defense_weight': 0.95,
+    'possession_modifier': 0.6
     },
     'all_out_attack': {
-        'name': 'Все в атаку',
-        'description': 'Агрессивная атака',
-        'attack_weight': 0.95,
-        'defense_weight': 0.05,
-        'possession_modifier': 1.1
+    'name': 'Все в атаку',
+    'description': 'Агрессивная атака',
+    'attack_weight': 0.95,
+    'defense_weight': 0.05,
+    'possession_modifier': 1.1
     }
 }
 
@@ -548,7 +380,7 @@ def get_team_average_rating(team_name):
 def update_league_table(round_results):
     """Обновляет турнирную таблицу на основе результатов матчей тура"""
     if 'game_data' not in session:
-        return
+    return
 
     game_data = session['game_data']
     table = game_data['table']
@@ -558,35 +390,35 @@ def update_league_table(round_results):
 
     # Обрабатываем каждый результат матча
     for result in round_results:
-        home_team = result['home_team']
-        away_team = result['away_team']
-        home_score = result['home_score']
-        away_score = result['away_score']
+    home_team = result['home_team']
+    away_team = result['away_team']
+    home_score = result['home_score']
+    away_score = result['away_score']
 
-        # Обновляем статистику домашней команды
-        if home_team in teams_dict:
-            team = teams_dict[home_team]
-            team['played'] += 1
-            team['won'] += 1 if home_score > away_score else 0
-            team['drawn'] += 1 if home_score == away_score else 0
-            team['lost'] += 1 if home_score < away_score else 0
-            team['points'] = team['won'] * 3 + team['drawn']
+    # Обновляем статистику домашней команды
+    if home_team in teams_dict:
+    team = teams_dict[home_team]
+    team['played'] += 1
+    team['won'] += 1 if home_score > away_score else 0
+    team['drawn'] += 1 if home_score == away_score else 0
+    team['lost'] += 1 if home_score < away_score else 0
+    team['points'] = team['won'] * 3 + team['drawn']
 
-        # Обновляем статистику гостевой команды
-        if away_team in teams_dict:
-            team = teams_dict[away_team]
-            team['played'] += 1
-            team['won'] += 1 if away_score > home_score else 0
-            team['drawn'] += 1 if away_score == home_score else 0
-            team['lost'] += 1 if away_score < home_score else 0
-            team['points'] = team['won'] * 3 + team['drawn']
+    # Обновляем статистику гостевой команды
+    if away_team in teams_dict:
+    team = teams_dict[away_team]
+    team['played'] += 1
+    team['won'] += 1 if away_score > home_score else 0
+    team['drawn'] += 1 if away_score == home_score else 0
+    team['lost'] += 1 if away_score < home_score else 0
+    team['points'] = team['won'] * 3 + team['drawn']
 
     # Сортируем таблицу по очкам
     table.sort(key=lambda x: (x['points'], x['won'], x['played']), reverse=True)
 
     # Обновляем позиции
     for i, team in enumerate(table, 1):
-        team['position'] = i
+    team['position'] = i
 
     # Сохраняем обновленную таблицу
     game_data['table'] = table
@@ -1082,15 +914,15 @@ def new_game():
     # Создаем список команд с логотипами
     teams_with_logos = []
     for team in TEAMS:
-        # Используем основной логотип, если не работает - запасной
-        logo_url = TEAM_LOGOS.get(team, '')
-        if not logo_url:
-            logo_url = TEAM_LOGOS_FALLBACK.get(team, '')
+    # Используем основной логотип, если не работает - запасной
+    logo_url = TEAM_LOGOS.get(team, '')
+    if not logo_url:
+    logo_url = TEAM_LOGOS_FALLBACK.get(team, '')
 
-        teams_with_logos.append({
-            'name': team,
-            'logo': logo_url
-        })
+    teams_with_logos.append({
+    'name': team,
+    'logo': logo_url
+    })
 
     print(f"Всего команд в TEAMS: {len(TEAMS)}")
     print(f"Передаю {len(teams_with_logos)} команд в шаблон")
@@ -1105,87 +937,87 @@ def new_game():
 def start_game():
     try:
     team_name = request.form.get('team')
-        print(f"DEBUG start_game: team_name = {team_name}")
+    print(f"DEBUG start_game: team_name = {team_name}")
 
     if team_name not in TEAMS:
-            print(f"DEBUG start_game: team {team_name} not in TEAMS")
-        return redirect(url_for('new_game'))
+    print(f"DEBUG start_game: team {team_name} not in TEAMS")
+    return redirect(url_for('new_game'))
     
-        # Очищаем старые данные тура для новой игры
-        session.pop('current_round', None)
-        session.pop('custom_schedule', None)
-        session.pop('match_results', None)  # Очищаем результаты предыдущих матчей
-        session.pop('last_round_results', None)  # Очищаем результаты последнего тура
+    # Очищаем старые данные тура для новой игры
+    session.pop('current_round', None)
+    session.pop('custom_schedule', None)
+    session.pop('match_results', None)  # Очищаем результаты предыдущих матчей
+    session.pop('last_round_results', None)  # Очищаем результаты последнего тура
 
-        print(f"DEBUG start_game: calling generate_game_data for {team_name}")
+    print(f"DEBUG start_game: calling generate_game_data for {team_name}")
     game_data = generate_game_data(team_name)
-        print(f"DEBUG start_game: game_data generated successfully")
+    print(f"DEBUG start_game: game_data generated successfully")
 
     session['game_data'] = game_data
-        session['current_round'] = game_data['current_round']
+    session['current_round'] = game_data['current_round']
     
-        print(f"DEBUG start_game: redirecting to game_page")
+    print(f"DEBUG start_game: redirecting to game_page")
     return redirect(url_for('game_page', page=1))
 
     except Exception as e:
-        print(f"ERROR in start_game: {e}")
-        import traceback
-        traceback.print_exc()
-        return f"Internal Server Error: {str(e)}", 500
+    print(f"ERROR in start_game: {e}")
+    import traceback
+    traceback.print_exc()
+    return f"Internal Server Error: {str(e)}", 500
 
 @app.route('/game/<int:page>')
 def game_page(page):
     if 'game_data' not in session:
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
     
     game_data = session['game_data']
     
     # Убеждаемся, что selected_players всегда определен
     if 'selected_players' not in game_data:
-        game_data['selected_players'] = []
-        session['game_data'] = game_data
+    game_data['selected_players'] = []
+    session['game_data'] = game_data
     
     # Для страницы состава: если нет выбранных игроков, берем первых 11
     if page == 3:
-        if not game_data.get('selected_players'):
-            game_data['selected_players'] = [p['name'] for p in game_data['squad'][:11]]
-            session['game_data'] = game_data
+    if not game_data.get('selected_players'):
+    game_data['selected_players'] = [p['name'] for p in game_data['squad'][:11]]
+    session['game_data'] = game_data
     
     if page == 1:
-        return render_template('game_page1.html', data=game_data)
+    return render_template('game_page1.html', data=game_data)
     elif page == 2:
-        return render_template('game_page2.html', data=game_data)
+    return render_template('game_page2.html', data=game_data)
     elif page == 3:
-        # Вычисляем реальные позиции для всех игроков в составе
-        squad_with_positions = []
-        for i, player in enumerate(game_data['squad']):
-            real_position = get_player_position(game_data['team_name'], i)
-            # Преобразуем в русские обозначения
-            if real_position == 'GK':
-                real_pos_display = 'В'
-            elif real_position == 'DEF':
-                real_pos_display = 'З'
-            elif real_position == 'MID':
-                real_pos_display = 'П'
-            elif real_position == 'FWD':
-                real_pos_display = 'Н'
-            else:
-                real_pos_display = 'В'  # fallback
-
-            player_copy = player.copy()
-            player_copy['real_position'] = real_pos_display
-            squad_with_positions.append(player_copy)
-
-        game_data_copy = game_data.copy()
-        game_data_copy['squad'] = squad_with_positions
-
-        return render_template('game_page3.html', data=game_data_copy)
-    elif page == 4:
-        return render_template('game_page4.html', data=game_data)
-    elif page == 5:
-        return render_template('game_page5.html', data=game_data)
+    # Вычисляем реальные позиции для всех игроков в составе
+    squad_with_positions = []
+    for i, player in enumerate(game_data['squad']):
+    real_position = get_player_position(game_data['team_name'], i)
+    # Преобразуем в русские обозначения
+    if real_position == 'GK':
+    real_pos_display = 'В'
+    elif real_position == 'DEF':
+    real_pos_display = 'З'
+    elif real_position == 'MID':
+    real_pos_display = 'П'
+    elif real_position == 'FWD':
+    real_pos_display = 'Н'
     else:
-        return redirect(url_for('game_page', page=1))
+    real_pos_display = 'В'  # fallback
+
+    player_copy = player.copy()
+    player_copy['real_position'] = real_pos_display
+    squad_with_positions.append(player_copy)
+
+    game_data_copy = game_data.copy()
+    game_data_copy['squad'] = squad_with_positions
+
+    return render_template('game_page3.html', data=game_data_copy)
+    elif page == 4:
+    return render_template('game_page4.html', data=game_data)
+    elif page == 5:
+    return render_template('game_page5.html', data=game_data)
+    else:
+    return redirect(url_for('game_page', page=1))
 
 @app.route('/about')
 def about():
@@ -1197,48 +1029,48 @@ def save_game():
     is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
 
     if is_vercel:
-        # На Vercel сохранение происходит через JavaScript в localStorage
-        # Здесь просто возвращаем успех для совместимости
-        return jsonify({"success": True, "message": "Сохранение обрабатывается браузером"})
+    # На Vercel сохранение происходит через JavaScript в localStorage
+    # Здесь просто возвращаем успех для совместимости
+    return jsonify({"success": True, "message": "Сохранение обрабатывается браузером"})
     else:
-        # На локальном сервере сохраняем на диск
+    # На локальном сервере сохраняем на диск
     if 'game_data' not in session:
-        return jsonify({"success": False, "message": "Нет данных для сохранения"})
+    return jsonify({"success": False, "message": "Нет данных для сохранения"})
     
     save_dir = 'saves'
     if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    os.makedirs(save_dir)
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{save_dir}/save_{timestamp}.json"
     
     with open(filename, 'w', encoding='utf-8') as f:
-        json.dump(session['game_data'], f, ensure_ascii=False, indent=2)
+    json.dump(session['game_data'], f, ensure_ascii=False, indent=2)
     
     return jsonify({"success": True, "message": "Игра сохранена!"})
 
 @app.route('/restore_game', methods=['POST'])
 def restore_game():
     try:
-        data = request.get_json()
-        if not data or 'gameData' not in data:
-            return jsonify({"success": False, "message": "Нет данных для восстановления"})
+    data = request.get_json()
+    if not data or 'gameData' not in data:
+    return jsonify({"success": False, "message": "Нет данных для восстановления"})
 
-        game_data = data['gameData']
+    game_data = data['gameData']
 
-        # Восстанавливаем сессию
-        session['game_data'] = game_data
-        session['current_round'] = game_data.get('current_round', 1)
+    # Восстанавливаем сессию
+    session['game_data'] = game_data
+    session['current_round'] = game_data.get('current_round', 1)
 
-        # Убеждаемся, что selected_players определен
-        if 'selected_players' not in game_data:
-            game_data['selected_players'] = []
+    # Убеждаемся, что selected_players определен
+    if 'selected_players' not in game_data:
+    game_data['selected_players'] = []
 
-        return jsonify({"success": True, "message": "Игра восстановлена успешно"})
+    return jsonify({"success": True, "message": "Игра восстановлена успешно"})
 
     except Exception as e:
-        print(f"Error restoring game: {e}")
-        return jsonify({"success": False, "message": "Ошибка при восстановлении игры"})
+    print(f"Error restoring game: {e}")
+    return jsonify({"success": False, "message": "Ошибка при восстановлении игры"})
 
 @app.route('/load_game')
 def load_game():
@@ -1246,24 +1078,24 @@ def load_game():
     is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
 
     if is_vercel:
-        # На Vercel показываем пустой список - сохранения обрабатываются JavaScript
-        return render_template('load_game.html', saves=[], is_vercel=True)
+    # На Vercel показываем пустой список - сохранения обрабатываются JavaScript
+    return render_template('load_game.html', saves=[], is_vercel=True)
 
     save_dir = 'saves'
     if not os.path.exists(save_dir):
-        return render_template('load_game.html', saves=[])
+    return render_template('load_game.html', saves=[])
     
     saves = []
     for filename in os.listdir(save_dir):
-        if filename.endswith('.json'):
-            filepath = os.path.join(save_dir, filename)
-            with open(filepath, 'r', encoding='utf-8') as f:
-                save_data = json.load(f)
-                saves.append({
-                    "filename": filename,
-                    "team": save_data.get('team_name', 'Unknown'),
-                    "timestamp": filename.replace('save_', '').replace('.json', '')
-                })
+    if filename.endswith('.json'):
+    filepath = os.path.join(save_dir, filename)
+    with open(filepath, 'r', encoding='utf-8') as f:
+    save_data = json.load(f)
+    saves.append({
+    "filename": filename,
+    "team": save_data.get('team_name', 'Unknown'),
+    "timestamp": filename.replace('save_', '').replace('.json', '')
+    })
     
     saves.sort(key=lambda x: x['timestamp'], reverse=True)
     return render_template('load_game.html', saves=saves)
@@ -1274,41 +1106,41 @@ def load_game_file(filename):
     is_vercel = os.environ.get('VERCEL') == '1' or 'vercel.app' in request.host
 
     if is_vercel and filename.startswith('session_'):
-        # Загружаем из сессии на Vercel
-        if 'saved_games' in session and session['saved_games']:
-            timestamp = filename.replace('session_', '')
-            for save_data in session['saved_games']:
-                if save_data['timestamp'] == timestamp:
-                    game_data = save_data['game_data']
-                    # Инициализируем selected_players, если его нет в сохранении
-                    if 'selected_players' not in game_data:
-                        game_data['selected_players'] = []
-                    session['game_data'] = game_data
-                    session['current_round'] = game_data.get('current_round', 1)
-                    return redirect(url_for('game_page', page=1))
+    # Загружаем из сессии на Vercel
+    if 'saved_games' in session and session['saved_games']:
+    timestamp = filename.replace('session_', '')
+    for save_data in session['saved_games']:
+    if save_data['timestamp'] == timestamp:
+    game_data = save_data['game_data']
+    # Инициализируем selected_players, если его нет в сохранении
+    if 'selected_players' not in game_data:
+    game_data['selected_players'] = []
+    session['game_data'] = game_data
+    session['current_round'] = game_data.get('current_round', 1)
+    return redirect(url_for('game_page', page=1))
 
-        return redirect(url_for('load_game'))
+    return redirect(url_for('load_game'))
     else:
-        # Загружаем с диска (локально)
+    # Загружаем с диска (локально)
     save_dir = 'saves'
     filepath = os.path.join(save_dir, filename)
     
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8') as f:
-            game_data = json.load(f)
-        # Инициализируем selected_players, если его нет в сохранении
-        if 'selected_players' not in game_data:
-            game_data['selected_players'] = []
-        session['game_data'] = game_data
-            session['current_round'] = game_data.get('current_round', 1)
-        return redirect(url_for('game_page', page=1))
+    with open(filepath, 'r', encoding='utf-8') as f:
+    game_data = json.load(f)
+    # Инициализируем selected_players, если его нет в сохранении
+    if 'selected_players' not in game_data:
+    game_data['selected_players'] = []
+    session['game_data'] = game_data
+    session['current_round'] = game_data.get('current_round', 1)
+    return redirect(url_for('game_page', page=1))
     else:
-        return redirect(url_for('load_game'))
+    return redirect(url_for('load_game'))
 
 @app.route('/update_lineup', methods=['POST'])
 def update_lineup():
     if 'game_data' not in session:
-        return jsonify({"success": False, "message": "Нет данных игры"})
+    return jsonify({"success": False, "message": "Нет данных игры"})
     
     data = request.json
     player_order = data.get('player_order', [])  # Список имен игроков в порядке
@@ -1320,15 +1152,15 @@ def update_lineup():
     
     session['game_data'] = game_data
     return jsonify({
-        "success": True,
-        "selected_count": len(game_data['selected_players']),
-        "selected_players": game_data['selected_players']
+    "success": True,
+    "selected_count": len(game_data['selected_players']),
+    "selected_players": game_data['selected_players']
     })
 
 @app.route('/pre_match')
 def pre_match():
     if 'game_data' not in session:
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
     
     import random
     from datetime import datetime, timedelta
@@ -1341,60 +1173,60 @@ def pre_match():
     
     # Если выбрано меньше 11 игроков, добавляем случайных
     if len(selected_players) < 11:
-        available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
-        needed = 11 - len(selected_players)
-        selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
+    available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
+    needed = 11 - len(selected_players)
+    selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
     
     # Получаем информацию о выбранных игроках в том порядке, в котором они были расставлены
     my_lineup = []
     for i, player_name in enumerate(selected_players[:11]):
-        player_info = next((p for p in my_squad if p['name'] == player_name), None)
-        if player_info:
-            # Определяем позицию на основе места в списке: 1=В, 2-5=З, 6-9=П, 10-11=Н
-            if i == 0:
-                position = 'В'  # Вратарь
-            elif i >= 1 and i <= 4:
-                position = 'З'  # Защитники
-            elif i >= 5 and i <= 8:
-                position = 'П'  # Полузащитники
-            elif i >= 9 and i <= 10:
-                position = 'Н'  # Нападение
-            else:
-                position = '-'
+    player_info = next((p for p in my_squad if p['name'] == player_name), None)
+    if player_info:
+    # Определяем позицию на основе места в списке: 1=В, 2-5=З, 6-9=П, 10-11=Н
+    if i == 0:
+    position = 'В'  # Вратарь
+    elif i >= 1 and i <= 4:
+    position = 'З'  # Защитники
+    elif i >= 5 and i <= 8:
+    position = 'П'  # Полузащитники
+    elif i >= 9 and i <= 10:
+    position = 'Н'  # Нападение
+    else:
+    position = '-'
             
-            my_lineup.append({**player_info, 'position': position})
+    my_lineup.append({**player_info, 'position': position})
     
     # Функция для определения позиции игрока на основе его места в реальном составе
-    def get_player_position(team_name, player_index, total_players):
-        """Определяет позицию игрока на основе его места в составе команды"""
-        # Анализируя реальные составы команд:
-        # - Индексы 0-1: вратари (обычно 2 вратаря)
-        # - Индексы 2-8: защитники (обычно 7 защитников)
-        # - Индексы 9-14: полузащитники (обычно 6 полузащитников)
-        # - Индексы 15+: нападающие (остальные)
-        if player_index < 2:
-            return 'В'  # Вратари
-        elif player_index < 9:
-            return 'З'  # Защитники
-        elif player_index < 15:
-            return 'П'  # Полузащитники
-        else:
-            return 'Н'  # Нападающие
+def get_player_position(team_name, player_index, total_players):
+    """Определяет позицию игрока на основе его места в составе команды"""
+    # Анализируя реальные составы команд:
+    # - Индексы 0-1: вратари (обычно 2 вратаря)
+    # - Индексы 2-8: защитники (обычно 7 защитников)
+    # - Индексы 9-14: полузащитники (обычно 6 полузащитников)
+    # - Индексы 15+: нападающие (остальные)
+    if player_index < 2:
+    return 'В'  # Вратари
+    elif player_index < 9:
+    return 'З'  # Защитники
+    elif player_index < 15:
+    return 'П'  # Полузащитники
+    else:
+    return 'Н'  # Нападающие
     
     # Генерируем состав соперника
     opponent_team = game_data['next_opponent']
     opponent_squad = []
     if opponent_team in SQUADS_2007_08:
-        for player_data in SQUADS_2007_08[opponent_team]:
-            if isinstance(player_data, tuple):
-                player_name, rating = player_data
-            else:
-                player_name = player_data
-                rating = 70
-            opponent_squad.append({
-                "name": player_name,
-                "rating": rating
-            })
+    for player_data in SQUADS_2007_08[opponent_team]:
+    if isinstance(player_data, tuple):
+    player_name, rating = player_data
+    else:
+    player_name = player_data
+    rating = 70
+    opponent_squad.append({
+    "name": player_name,
+    "rating": rating
+    })
 
     # Формируем оптимальный состав
     opponent_lineup = create_optimal_lineup(opponent_squad, opponent_team)
@@ -1412,21 +1244,21 @@ def pre_match():
     attendance = int(stadium_capacity * attendance_percent / 100)
     
     return render_template('pre_match.html', 
-                         my_team=my_team,
-                         opponent_team=opponent_team,
-                         my_lineup=my_lineup,
-                         opponent_lineup=opponent_lineup,
-                         stadium_name=stadium_name,
-                         match_time=match_time,
-                         attendance=attendance,
-                         stadium_capacity=stadium_capacity,
-                         TEAM_LOGOS=TEAM_LOGOS,
-                         TEAM_LOGOS_FALLBACK=TEAM_LOGOS_FALLBACK)
+    my_team=my_team,
+    opponent_team=opponent_team,
+    my_lineup=my_lineup,
+    opponent_lineup=opponent_lineup,
+    stadium_name=stadium_name,
+    match_time=match_time,
+    attendance=attendance,
+    stadium_capacity=stadium_capacity,
+    TEAM_LOGOS=TEAM_LOGOS,
+    TEAM_LOGOS_FALLBACK=TEAM_LOGOS_FALLBACK)
 
 @app.route('/match')
 def match():
     if 'game_data' not in session:
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
     
     import random
     game_data = session['game_data']
@@ -1440,29 +1272,29 @@ def match():
     
     # Если выбрано меньше 11 игроков, добавляем случайных
     if len(selected_players) < 11:
-        available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
-        needed = 11 - len(selected_players)
-        selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
+    available_players = [p['name'] for p in my_squad if p['name'] not in selected_players]
+    needed = 11 - len(selected_players)
+    selected_players.extend(random.sample(available_players, min(needed, len(available_players))))
     
     my_lineup = []
     for player_name in selected_players[:11]:
-        player_info = next((p for p in my_squad if p['name'] == player_name), None)
-        if player_info:
-            my_lineup.append(player_info)
+    player_info = next((p for p in my_squad if p['name'] == player_name), None)
+    if player_info:
+    my_lineup.append(player_info)
     
     # Генерируем состав соперника
     opponent_squad = []
     if opponent_team in SQUADS_2007_08:
-        for player_data in SQUADS_2007_08[opponent_team]:
-            if isinstance(player_data, tuple):
-                player_name, rating = player_data
-            else:
-                player_name = player_data
-                rating = 70
-            opponent_squad.append({
-                "name": player_name,
-                "rating": rating
-            })
+    for player_data in SQUADS_2007_08[opponent_team]:
+    if isinstance(player_data, tuple):
+    player_name, rating = player_data
+    else:
+    player_name = player_data
+    rating = 70
+    opponent_squad.append({
+    "name": player_name,
+    "rating": rating
+    })
     
     # Формируем оптимальный состав: 1 GK + 4 DEF + 4 MID + 2 FWD = 11 игроков
     opponent_lineup = create_optimal_lineup(opponent_squad, opponent_team)
@@ -1470,21 +1302,21 @@ def match():
     # Всегда создаем новые данные матча при заходе на страницу матча
     # Это гарантирует, что матч начинается с нуля
     session['match_data'] = {
-        'my_team': my_team,
-        'opponent_team': opponent_team,
-        'my_score': 0,
-        'opponent_score': 0,
-        'goals': [],
-        'half': 1,
-        'minute': 0,
-        'possession_my': 50,
-        'possession_opponent': 50,
-        'shots_my': 0,
-        'shots_opponent': 0,
-        'shots_on_target_my': 0,
-        'shots_on_target_opponent': 0,
-        'xg_my': 0.0,
-        'xg_opponent': 0.0
+    'my_team': my_team,
+    'opponent_team': opponent_team,
+    'my_score': 0,
+    'opponent_score': 0,
+    'goals': [],
+    'half': 1,
+    'minute': 0,
+    'possession_my': 50,
+    'possession_opponent': 50,
+    'shots_my': 0,
+    'shots_opponent': 0,
+    'shots_on_target_my': 0,
+    'shots_on_target_opponent': 0,
+    'xg_my': 0.0,
+    'xg_opponent': 0.0
     }
     
     match_data = session['match_data']
@@ -1503,146 +1335,146 @@ def match():
     xg_opponent_percent = (match_data['xg_opponent'] / total_xg) * 100
     
     return render_template('match.html',
-                         my_team=my_team,
-                         opponent_team=opponent_team,
-                         match_data=match_data,
-                         my_lineup=my_lineup,
-                         opponent_lineup=opponent_lineup,
-                         shots_my_percent=shots_my_percent,
-                         shots_opponent_percent=shots_opponent_percent,
-                         shots_on_target_my_percent=shots_on_target_my_percent,
-                         shots_on_target_opponent_percent=shots_on_target_opponent_percent,
-                         xg_my_percent=xg_my_percent,
-                         xg_opponent_percent=xg_opponent_percent,
-                         TEAM_LOGOS=TEAM_LOGOS,
-                         TEAM_LOGOS_FALLBACK=TEAM_LOGOS_FALLBACK)
+    my_team=my_team,
+    opponent_team=opponent_team,
+    match_data=match_data,
+    my_lineup=my_lineup,
+    opponent_lineup=opponent_lineup,
+    shots_my_percent=shots_my_percent,
+    shots_opponent_percent=shots_opponent_percent,
+    shots_on_target_my_percent=shots_on_target_my_percent,
+    shots_on_target_opponent_percent=shots_on_target_opponent_percent,
+    xg_my_percent=xg_my_percent,
+    xg_opponent_percent=xg_opponent_percent,
+    TEAM_LOGOS=TEAM_LOGOS,
+    TEAM_LOGOS_FALLBACK=TEAM_LOGOS_FALLBACK)
 
 @app.route('/match_action', methods=['POST'])
 def match_action():
     try:
     if 'game_data' not in session or 'match_data' not in session:
-            return jsonify({"success": False, "error": "Session not initialized"})
+    return jsonify({"success": False, "error": "Session not initialized"})
 
     import random
-        data = request.get_json()
-        action = data.get('action', '')
+    data = request.get_json()
+    action = data.get('action', '')
 
     match_data = session['match_data']
     game_data = session['game_data']
 
-        # Инициализируем статистику если не существует
-        if 'shots_my' not in match_data:
-            match_data['shots_my'] = 0
-        if 'shots_opponent' not in match_data:
-            match_data['shots_opponent'] = 0
-        if 'shots_on_target_my' not in match_data:
-            match_data['shots_on_target_my'] = 0
-        if 'shots_on_target_opponent' not in match_data:
-            match_data['shots_on_target_opponent'] = 0
-        if 'possession_my' not in match_data:
-            match_data['possession_my'] = 50
-        if 'possession_opponent' not in match_data:
-            match_data['possession_opponent'] = 50
-        if 'xg_my' not in match_data:
-            match_data['xg_my'] = 0.0
-        if 'xg_opponent' not in match_data:
-            match_data['xg_opponent'] = 0.0
+    # Инициализируем статистику если не существует
+    if 'shots_my' not in match_data:
+    match_data['shots_my'] = 0
+    if 'shots_opponent' not in match_data:
+    match_data['shots_opponent'] = 0
+    if 'shots_on_target_my' not in match_data:
+    match_data['shots_on_target_my'] = 0
+    if 'shots_on_target_opponent' not in match_data:
+    match_data['shots_on_target_opponent'] = 0
+    if 'possession_my' not in match_data:
+    match_data['possession_my'] = 50
+    if 'possession_opponent' not in match_data:
+    match_data['possession_opponent'] = 50
+    if 'xg_my' not in match_data:
+    match_data['xg_my'] = 0.0
+    if 'xg_opponent' not in match_data:
+    match_data['xg_opponent'] = 0.0
     
     if action == 'tick':
-            # Обновляем таймер
-        minute = data.get('minute', 0)
-        half = data.get('half', 1)
+    # Обновляем таймер
+    minute = data.get('minute', 0)
+    half = data.get('half', 1)
             
-            # Увеличиваем минуту
-            minute += 1
-            if half == 1 and minute > 45:
-                minute = 45  # Останавливаемся на 45 минуте
-            elif half == 2 and minute > 90:
-                minute = 90  # Матч окончен
+    # Увеличиваем минуту
+    minute += 1
+    if half == 1 and minute > 45:
+    minute = 45  # Останавливаемся на 45 минуте
+    elif half == 2 and minute > 90:
+    minute = 90  # Матч окончен
         
-        match_data['minute'] = minute
-        match_data['half'] = half
+    match_data['minute'] = minute
+    match_data['half'] = half
         
-            # Генерируем события
-            events = []
-            if random.random() < 0.08:  # 8% шанс события
-                if random.random() < 0.6:  # Моя команда
-                match_data['shots_my'] += 1
-                    if random.random() < 0.4:  # Попадание
-                    match_data['shots_on_target_my'] += 1
-                        match_data['xg_my'] += random.uniform(0.05, 0.15)
-                        if random.random() < 0.2:  # ГОЛ!
-                            match_data['score_my'] = match_data.get('score_my', 0) + 1
-                            events.append("⚽ ГОЛ! " + game_data['team_name'] + " забивает!")
-                else:  # Соперник
-                match_data['shots_opponent'] += 1
-                    if random.random() < 0.4:  # Попадание
-                    match_data['shots_on_target_opponent'] += 1
-                        match_data['xg_opponent'] += random.uniform(0.05, 0.15)
-                        if random.random() < 0.2:  # ГОЛ!
-                            match_data['score_opponent'] = match_data.get('score_opponent', 0) + 1
-                            events.append("⚽ ГОЛ! " + game_data['next_opponent'] + " забивает!")
+    # Генерируем события
+    events = []
+    if random.random() < 0.08:  # 8% шанс события
+    if random.random() < 0.6:  # Моя команда
+    match_data['shots_my'] += 1
+    if random.random() < 0.4:  # Попадание
+    match_data['shots_on_target_my'] += 1
+    match_data['xg_my'] += random.uniform(0.05, 0.15)
+    if random.random() < 0.2:  # ГОЛ!
+    match_data['score_my'] = match_data.get('score_my', 0) + 1
+    events.append("⚽ ГОЛ! " + game_data['team_name'] + " забивает!")
+    else:  # Соперник
+    match_data['shots_opponent'] += 1
+    if random.random() < 0.4:  # Попадание
+    match_data['shots_on_target_opponent'] += 1
+    match_data['xg_opponent'] += random.uniform(0.05, 0.15)
+    if random.random() < 0.2:  # ГОЛ!
+    match_data['score_opponent'] = match_data.get('score_opponent', 0) + 1
+    events.append("⚽ ГОЛ! " + game_data['next_opponent'] + " забивает!")
 
-            session['match_data'] = match_data
+    session['match_data'] = match_data
 
-            return jsonify({
-                "success": True,
-                "match_data": {
-                    "minute": minute,
-                    "half": half,
-                    "my_score": match_data.get('score_my', 0),
-                    "opponent_score": match_data.get('score_opponent', 0),
-                    "finished": minute >= 90,
-                    "events": events,
-                    "stats": {
-                        "shots": match_data['shots_my'],
-                        "shots_on_target": match_data['shots_on_target_my'],
-                        "possession": match_data['possession_my'],
-                        "xg": round(match_data['xg_my'], 2)
-                    },
-                    "goals": match_data.get('goals', [])
-                }
-            })
+    return jsonify({
+    "success": True,
+    "match_data": {
+    "minute": minute,
+    "half": half,
+    "my_score": match_data.get('score_my', 0),
+    "opponent_score": match_data.get('score_opponent', 0),
+    "finished": minute >= 90,
+    "events": events,
+    "stats": {
+    "shots": match_data['shots_my'],
+    "shots_on_target": match_data['shots_on_target_my'],
+    "possession": match_data['possession_my'],
+    "xg": round(match_data['xg_my'], 2)
+    },
+    "goals": match_data.get('goals', [])
+    }
+    })
         
     elif action == 'start_second_half':
-        match_data['half'] = 2
-        match_data['minute'] = 46
-            session['match_data'] = match_data
+    match_data['half'] = 2
+    match_data['minute'] = 46
+    session['match_data'] = match_data
 
-            return jsonify({
-                "success": True,
-                "match_data": {
-                    "minute": 46,
-                    "half": 2,
-                    "my_score": match_data.get('score_my', 0),
-                    "opponent_score": match_data.get('score_opponent', 0),
-                    "finished": False,
-                    "events": ["Второй тайм начался!"],
-                    "goals": match_data.get('goals', [])
-                }
-            })
+    return jsonify({
+    "success": True,
+    "match_data": {
+    "minute": 46,
+    "half": 2,
+    "my_score": match_data.get('score_my', 0),
+    "opponent_score": match_data.get('score_opponent', 0),
+    "finished": False,
+    "events": ["Второй тайм начался!"],
+    "goals": match_data.get('goals', [])
+    }
+    })
     
     elif action == 'end_match':
-            # Простая версия завершения матча
-            return jsonify({
-                "success": True,
-                "season_end": False,
-                "next_opponent": "Manchester United",
-                "is_home_match": True,
-                "final_score": str(match_data.get('score_my', 0)) + "-" + str(match_data.get('score_opponent', 0))
-            })
+    # Простая версия завершения матча
+    return jsonify({
+    "success": True,
+    "season_end": False,
+    "next_opponent": "Manchester United",
+    "is_home_match": True,
+    "final_score": str(match_data.get('score_my', 0)) + "-" + str(match_data.get('score_opponent', 0))
+    })
 
-        return jsonify({"success": False, "error": "Unknown action"})
+    return jsonify({"success": False, "error": "Unknown action"})
 
     except Exception as e:
-        import traceback
-        print("Error in match_action: " + str(e))
-        traceback.print_exc()
-        return jsonify({"success": False, "error": str(e)})
+    import traceback
+    print("Error in match_action: " + str(e))
+    traceback.print_exc()
+    return jsonify({"success": False, "error": str(e)})
 @app.route('/match_results')
 def match_results():
     if 'last_round_results' not in session:
-        return redirect(url_for('game_page', page=1))
+    return redirect(url_for('game_page', page=1))
     
     results = session['last_round_results']
     return render_template('match_results.html', results=results)
@@ -1650,13 +1482,13 @@ def match_results():
 @app.route('/change_tactic', methods=['POST'])
 def change_tactic():
     if 'game_data' not in session:
-        return jsonify({"success": False, "message": "Игра не найдена"})
+    return jsonify({"success": False, "message": "Игра не найдена"})
 
     data = request.get_json()
     tactic = data.get('tactic', 'balanced')
 
     if tactic not in TACTICS:
-        return jsonify({"success": False, "message": "Неверная тактика"})
+    return jsonify({"success": False, "message": "Неверная тактика"})
 
     # Сохраняем выбранную тактику
     game_data = session['game_data']
@@ -1664,15 +1496,15 @@ def change_tactic():
     session['game_data'] = game_data
 
     return jsonify({
-        "success": True,
-        "message": f"Тактика изменена на {TACTICS[tactic]['name']}",
-        "tactic": TACTICS[tactic]
+    "success": True,
+    "message": f"Тактика изменена на {TACTICS[tactic]['name']}",
+    "tactic": TACTICS[tactic]
     })
 
 @app.route('/top_scorers')
 def top_scorers():
     if 'game_data' not in session:
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
     game_data = session['game_data']
 
@@ -1681,19 +1513,19 @@ def top_scorers():
 
     # Проверяем сохраненные результаты матчей
     if 'match_results' in session:
-        for result in session['match_results']:
-            if 'goals' in result:
-                for goal in result['goals']:
-                    scorer_name = goal['scorer']
-                    team_name = goal['team']
+    for result in session['match_results']:
+    if 'goals' in result:
+    for goal in result['goals']:
+    scorer_name = goal['scorer']
+    team_name = goal['team']
 
-                    if scorer_name not in scorers_stats:
-                        scorers_stats[scorer_name] = {
-                            'name': scorer_name,
-                            'team': team_name,
-                            'goals': 0
-                        }
-                    scorers_stats[scorer_name]['goals'] += 1
+    if scorer_name not in scorers_stats:
+    scorers_stats[scorer_name] = {
+    'name': scorer_name,
+    'team': team_name,
+    'goals': 0
+    }
+    scorers_stats[scorer_name]['goals'] += 1
 
     # Преобразуем в список и сортируем по количеству голов
     scorers_list = list(scorers_stats.values())
@@ -1713,10 +1545,10 @@ def favicon():
 def handle_500(error):
     # Проверяем, является ли запрос к match_action
     if request.path == '/match_action':
-        print(f"Global 500 error handler for match_action: {error}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({"success": False, "error": "Internal server error"})
+    print(f"Global 500 error handler for match_action: {error}")
+    import traceback
+    traceback.print_exc()
+    return jsonify({"success": False, "error": "Internal server error"})
     # Для других маршрутов возвращаем стандартную ошибку
     return error
 
