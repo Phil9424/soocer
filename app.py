@@ -1373,154 +1373,23 @@ def pre_match():
         else:
             return 'Н'  # Нападающие
     
-    # Генерируем состав соперника с позициями на основе реального порядка
+    # Генерируем состав соперника
     opponent_team = game_data['next_opponent']
-    opponent_squad_with_positions = []
+    opponent_squad = []
     if opponent_team in SQUADS_2007_08:
-        for idx, player_data in enumerate(SQUADS_2007_08[opponent_team]):
+        for player_data in SQUADS_2007_08[opponent_team]:
             if isinstance(player_data, tuple):
                 player_name, rating = player_data
             else:
                 player_name = player_data
                 rating = 70
-            position = get_player_position(opponent_team, idx, len(SQUADS_2007_08[opponent_team]))
-            opponent_squad_with_positions.append({
+            opponent_squad.append({
                 "name": player_name,
-                "rating": rating,
-                "position": position,
-                "original_index": idx
+                "rating": rating
             })
-    
-    # Формируем базовый состав: 1 вратарь, 4 защитника, 4 полузащитника, 2 нападающих
-    goalkeepers = [p for p in opponent_squad_with_positions if p['position'] == 'В']
-    defenders = [p for p in opponent_squad_with_positions if p['position'] == 'З']
-    midfielders = [p for p in opponent_squad_with_positions if p['position'] == 'П']
-    forwards = [p for p in opponent_squad_with_positions if p['position'] == 'Н']
-    
-    # Сортируем по рейтингу для выбора лучших
-    goalkeepers_sorted = sorted(goalkeepers, key=lambda x: x['rating'], reverse=True)
-    defenders_sorted = sorted(defenders, key=lambda x: x['rating'], reverse=True)
-    midfielders_sorted = sorted(midfielders, key=lambda x: x['rating'], reverse=True)
-    forwards_sorted = sorted(forwards, key=lambda x: x['rating'], reverse=True)
-    
-    # Выбираем основной состав
-    selected_gk = goalkeepers_sorted[0] if goalkeepers_sorted else None
-    selected_defenders = defenders_sorted[:4] if len(defenders_sorted) >= 4 else defenders_sorted
-    selected_midfielders = midfielders_sorted[:4] if len(midfielders_sorted) >= 4 else midfielders_sorted
-    selected_forwards = forwards_sorted[:2] if len(forwards_sorted) >= 2 else forwards_sorted
-    
-    # Делаем случайные замены (1-2 игрока) - заменяем на игроков из запасных
-    num_substitutions = random.randint(1, 2)
-    substitutions_made = 0
-    
-    # Функция для получения следующего доступного игрока из списка
-    def get_next_available_player(player_list, current_selection):
-        selected_names = {p['name'] for p in current_selection}
-        for player in player_list:
-            if player['name'] not in selected_names:
-                return player
-        return None
-    
-    # Замены защитников
-    if len(defenders_sorted) > 4 and substitutions_made < num_substitutions:
-        if random.random() < 0.5:  # 50% шанс заменить защитника
-            if selected_defenders:
-                removed = random.choice(selected_defenders)
-                selected_defenders.remove(removed)
-                substitute = get_next_available_player(defenders_sorted, selected_defenders)
-                if substitute:
-                    selected_defenders.append(substitute)
-                    substitutions_made += 1
-                else:
-                    selected_defenders.append(removed)  # Возвращаем обратно, если нет замены
-    
-    # Замены полузащитников
-    if len(midfielders_sorted) > 4 and substitutions_made < num_substitutions:
-        if random.random() < 0.5:  # 50% шанс заменить полузащитника
-            if selected_midfielders:
-                removed = random.choice(selected_midfielders)
-                selected_midfielders.remove(removed)
-                substitute = get_next_available_player(midfielders_sorted, selected_midfielders)
-                if substitute:
-                    selected_midfielders.append(substitute)
-                    substitutions_made += 1
-                else:
-                    selected_midfielders.append(removed)  # Возвращаем обратно, если нет замены
-    
-    # Замены нападающих
-    if len(forwards_sorted) > 2 and substitutions_made < num_substitutions:
-        if random.random() < 0.5:  # 50% шанс заменить нападающего
-            if selected_forwards:
-                removed = random.choice(selected_forwards)
-                selected_forwards.remove(removed)
-                substitute = get_next_available_player(forwards_sorted, selected_forwards)
-                if substitute:
-                    selected_forwards.append(substitute)
-                    substitutions_made += 1
-                else:
-                    selected_forwards.append(removed)  # Возвращаем обратно, если нет замены
-    
-    # Формируем финальный состав в правильном порядке: В, З, З, З, З, П, П, П, П, Н, Н
-    opponent_lineup = []
-    if selected_gk:
-        opponent_lineup.append({**selected_gk, 'position': 'В'})
-    
-    # Защитники (4)
-    for i in range(min(4, len(selected_defenders))):
-        opponent_lineup.append({**selected_defenders[i], 'position': 'З'})
-    
-    # Полузащитники (4)
-    for i in range(min(4, len(selected_midfielders))):
-        opponent_lineup.append({**selected_midfielders[i], 'position': 'П'})
-    
-    # Нападающие (2)
-    for i in range(min(2, len(selected_forwards))):
-        opponent_lineup.append({**selected_forwards[i], 'position': 'Н'})
-    
-    # Проверяем на дубликаты и убираем их
-    seen_names = set()
-    opponent_lineup_unique = []
-    for player in opponent_lineup:
-        if player['name'] not in seen_names:
-            opponent_lineup_unique.append(player)
-            seen_names.add(player['name'])
-    opponent_lineup = opponent_lineup_unique
-    
-    # Если не хватает игроков до 11, дополняем из запасных той же позиции
-    while len(opponent_lineup) < 11:
-        lineup_names = {p['name'] for p in opponent_lineup}
-        added = False
-        
-        if not selected_gk and goalkeepers_sorted:
-            for gk in goalkeepers_sorted:
-                if gk['name'] not in lineup_names:
-                    opponent_lineup.insert(0, {**gk, 'position': 'В'})
-                    added = True
-                    break
-        
-        if not added and len(opponent_lineup) <= 4:
-            for defender in defenders_sorted:
-                if defender['name'] not in lineup_names:
-                    opponent_lineup.append({**defender, 'position': 'З'})
-                    added = True
-                    break
-        
-        if not added and len(opponent_lineup) <= 8:
-            for midfielder in midfielders_sorted:
-                if midfielder['name'] not in lineup_names:
-                    opponent_lineup.append({**midfielder, 'position': 'П'})
-                    added = True
-                    break
-        
-        if not added and len(opponent_lineup) <= 10:
-            for forward in forwards_sorted:
-                if forward['name'] not in lineup_names:
-                    opponent_lineup.append({**forward, 'position': 'Н'})
-                    added = True
-                    break
-        
-        if not added:
-            break
+
+    # Формируем оптимальный состав
+    opponent_lineup = create_optimal_lineup(opponent_squad, opponent_team)
     
     # Генерируем информацию о матче
     stadium_name = game_data.get('stadium', f"{my_team} Stadium")
