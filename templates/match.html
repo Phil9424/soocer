@@ -111,7 +111,7 @@
         <div class="match-controls">
             {% if match_data.half == 1 and match_data.minute >= 47 %}
                 <button class="btn btn-success" id="start-second-half-btn" onclick="startSecondHalf()" style="font-size: 1.2rem; padding: 1rem 2rem;">⏱️ Начать 2 тайм</button>
-            {% elif match_data.half == 2 and match_data.minute >= 92 %}
+            {% elif match_data.half == 2 and match_data.minute >= 85 %}
                 <button class="btn btn-success" id="end-match-btn" onclick="endMatch()" style="font-size: 1.2rem; padding: 1rem 2rem;">✅ Завершить матч</button>
             {% else %}
                 <button class="btn btn-secondary" onclick="showSubstitutions()">🔄 Замены</button>
@@ -222,7 +222,7 @@ function updateTimer() {
                 addedTimeEl.style.display = 'inline';
             }
             // Останавливаем таймер после 90+2 и показываем кнопку ОК
-            if (currentMinute >= 92) {
+            if (currentMinute >= 87) {
                 isRunning = false;
                 clearInterval(timerInterval);
                 showEndMatchButton();
