@@ -8,13 +8,28 @@ app = Flask(__name__,
             static_url_path='/static')
 app.secret_key = 'football_manager_secret_key_2024'
 
-# Простые данные для тестирования
+# Полноценная Премьер-лига 2007-08
 TEAMS_DATA = [
     {'name': 'Arsenal', 'logo': '/static/logos/arsenal.png'},
     {'name': 'Chelsea', 'logo': '/static/logos/chelsea.png'},
     {'name': 'Manchester United', 'logo': '/static/logos/manchester_united.png'},
     {'name': 'Liverpool', 'logo': '/static/logos/liverpool.png'},
-    {'name': 'Manchester City', 'logo': '/static/logos/manchester_city.png'}
+    {'name': 'Manchester City', 'logo': '/static/logos/manchester_city.png'},
+    {'name': 'Tottenham Hotspur', 'logo': '/static/logos/tottenham.png'},
+    {'name': 'Everton', 'logo': '/static/logos/everton.png'},
+    {'name': 'Newcastle United', 'logo': '/static/logos/newcastle.png'},
+    {'name': 'West Ham United', 'logo': '/static/logos/west_ham.png'},
+    {'name': 'Aston Villa', 'logo': '/static/logos/aston_villa.png'},
+    {'name': 'Blackburn Rovers', 'logo': '/static/logos/blackburn.png'},
+    {'name': 'Portsmouth', 'logo': '/static/logos/portsmouth.png'},
+    {'name': 'Middlesbrough', 'logo': '/static/logos/middlesbrough.png'},
+    {'name': 'Wigan Athletic', 'logo': '/static/logos/wigan.png'},
+    {'name': 'Fulham', 'logo': '/static/logos/fulham.png'},
+    {'name': 'Charlton Athletic', 'logo': '/static/logos/charlton.png'},
+    {'name': 'Bolton Wanderers', 'logo': '/static/logos/bolton.png'},
+    {'name': 'Sunderland', 'logo': '/static/logos/sunderland.png'},
+    {'name': 'Reading', 'logo': '/static/logos/reading.png'},
+    {'name': 'Birmingham City', 'logo': '/static/logos/birmingham.png'}
 ]
 TEAMS = [team['name'] for team in TEAMS_DATA]
 TEAM_LOGOS = {}
@@ -53,12 +68,17 @@ def start_game():
     if not team_name or team_name not in TEAMS:
         return redirect(url_for('new_game'))
 
+    # Выбираем случайного соперника
+    available_opponents = [t for t in TEAMS if t != team_name]
+    import random
+    next_opponent = random.choice(available_opponents)
+
     # Создаем игровую сессию
     session['game_data'] = {
         'team_name': team_name,
         'squad': [{'name': f'Player {i}', 'rating': 70} for i in range(20)],
         'selected_players': [f'Player {i}' for i in range(11)],
-        'next_opponent': 'Chelsea' if team_name != 'Chelsea' else 'Arsenal',
+        'next_opponent': next_opponent,
         'current_round': 1
     }
 
